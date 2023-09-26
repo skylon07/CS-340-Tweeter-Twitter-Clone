@@ -20,7 +20,9 @@ public class FollowingPresenter {
 
     private final View view;
 
-    public FollowingPresenter(View view) { this.view = view; }
+    public FollowingPresenter(View view) {
+        this.view = view;
+    }
 
     public User lastFollowee() {
         return lastFollowee;
