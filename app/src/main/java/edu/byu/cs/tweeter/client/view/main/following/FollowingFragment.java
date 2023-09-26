@@ -84,10 +84,6 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
         return view;
     }
 
-    public void displayUserLoading() {
-        Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
-    }
-
     public void addFollowees(List<User> followees) {
         followingRecyclerViewAdapter.addItems(followees);
     }
@@ -102,15 +98,15 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
     }
 
     @Override
-    public void displayMessage(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
     public void setCurrentUser(User user) {
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
         startActivity(intent);
+    }
+
+    @Override
+    public void displayMessage(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
     /**

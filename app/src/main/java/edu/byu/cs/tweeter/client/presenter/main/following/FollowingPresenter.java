@@ -27,7 +27,7 @@ public class FollowingPresenter {
     public boolean hasMorePages() {
         return hasMorePages;
     }
-    
+
     public boolean isLoading() {
         return isLoading;
     }
@@ -37,7 +37,7 @@ public class FollowingPresenter {
     }
 
     public void loadUserProfile(String userName) {
-        view.displayUserLoading();
+        view.displayMessage("Getting user's profile...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
         userService.loadUser(authToken, userName, new UserServiceObserver());
     }
@@ -52,10 +52,9 @@ public class FollowingPresenter {
     }
 
     public interface View {
-        void displayUserLoading();
-        void setCurrentUser(User user);
         void addFollowees(List<User> followees);
         void setLoadingFooterVisible(boolean visible);
+        void setCurrentUser(User user);
         void displayMessage(String message);
     }
 
