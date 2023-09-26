@@ -24,12 +24,10 @@ public class FollowingPresenter {
         this.view = view;
     }
 
-    public User lastFollowee() {
-        return lastFollowee;
-    }
     public boolean hasMorePages() {
         return hasMorePages;
     }
+    
     public boolean isLoading() {
         return isLoading;
     }
