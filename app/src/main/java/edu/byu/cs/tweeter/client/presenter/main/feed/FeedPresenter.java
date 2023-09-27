@@ -1,7 +1,5 @@
 package edu.byu.cs.tweeter.client.presenter.main.feed;
 
-import android.widget.Toast;
-
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
