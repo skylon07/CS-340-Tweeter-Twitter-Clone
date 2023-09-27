@@ -85,7 +85,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
         followersRecyclerView.setLayoutManager(layoutManager);
 
         followersRecyclerViewAdapter = new FollowersRecyclerViewAdapter();
-        followersRecyclerViewAdapter.loadMoreItems();
+        presenter.loadMoreItems(user);
         followersRecyclerView.setAdapter(followersRecyclerViewAdapter);
 
         followersRecyclerView.addOnScrollListener(new FollowRecyclerViewPaginationScrollListener(layoutManager));
@@ -276,8 +276,8 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
          * Causes the Adapter to display a loading footer and make a request to get more following
          * data.
          */
-        void loadMoreItems() {
-            presenter.loadMoreItems(user);
+        void onScrolled() {
+            presenter.onScrolled(user);
         }
 
         /**
@@ -370,7 +370,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
                     // Run this code later on the UI thread
                     final Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(() -> {
-                        followersRecyclerViewAdapter.loadMoreItems();
+                        followersRecyclerViewAdapter.onScrolled();
                     }, 0);
                 }
             }

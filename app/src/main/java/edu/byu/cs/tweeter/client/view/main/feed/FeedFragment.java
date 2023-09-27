@@ -85,7 +85,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
         feedRecyclerView.setLayoutManager(layoutManager);
 
         feedRecyclerViewAdapter = new FeedRecyclerViewAdapter();
-        feedRecyclerViewAdapter.loadMoreItems();
+        presenter.loadMoreItems(user);
         feedRecyclerView.setAdapter(feedRecyclerViewAdapter);
 
         feedRecyclerView.addOnScrollListener(new FeedRecyclerViewPaginationScrollListener(layoutManager));
@@ -312,8 +312,8 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
          * Causes the Adapter to display a loading footer and make a request to get more feed
          * data.
          */
-        void loadMoreItems() {
-            presenter.loadMoreItems(user);
+        void onScrolled() {
+            presenter.onScrolled(user);
         }
 
         /**
@@ -377,7 +377,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
                     // Run this code later on the UI thread
                     final Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(() -> {
-                        feedRecyclerViewAdapter.loadMoreItems();
+                        feedRecyclerViewAdapter.onScrolled();
                     }, 0);
                 }
             }

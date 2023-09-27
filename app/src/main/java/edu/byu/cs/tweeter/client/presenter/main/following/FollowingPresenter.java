@@ -36,6 +36,10 @@ public class FollowingPresenter {
         loadUserProfile(userName);
     }
 
+    public void onScrolled(User user) {
+        loadMoreItems(user);
+    }
+
     public void loadUserProfile(String userName) {
         view.displayMessage("Getting user's profile...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();

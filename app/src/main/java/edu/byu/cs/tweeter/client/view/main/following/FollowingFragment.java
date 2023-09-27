@@ -76,7 +76,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
         followingRecyclerView.setLayoutManager(layoutManager);
 
         followingRecyclerViewAdapter = new FollowingRecyclerViewAdapter();
-        followingRecyclerViewAdapter.loadMoreItems();
+        presenter.loadMoreItems(user);
         followingRecyclerView.setAdapter(followingRecyclerViewAdapter);
 
         followingRecyclerView.addOnScrollListener(new FollowRecyclerViewPaginationScrollListener(layoutManager));
@@ -257,8 +257,8 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          * Causes the Adapter to display a loading footer and make a request to get more following
          * data.
          */
-        void loadMoreItems() {
-            presenter.loadMoreItems(user);
+        void onScrolled() {
+            presenter.onScrolled(user);
         }
 
         /**
@@ -319,7 +319,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
                     // Run this code later on the UI thread
                     final Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(() -> {
-                        followingRecyclerViewAdapter.loadMoreItems();
+                        followingRecyclerViewAdapter.onScrolled();
                     }, 0);
                 }
             }
