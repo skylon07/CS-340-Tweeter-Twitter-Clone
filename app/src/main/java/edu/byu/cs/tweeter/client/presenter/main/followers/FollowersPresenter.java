@@ -23,6 +23,14 @@ public class FollowersPresenter {
         this.view = view;
     }
 
+    public boolean hasMorePages() {
+        return hasMorePages;
+    }
+
+    public boolean isLoading() {
+        return isLoading;
+    }
+
     public void onFollowerItemClick(String userAlias) {
         loadUserProfile(userAlias);
     }
