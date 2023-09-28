@@ -17,7 +17,7 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService {
-    public void loadFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, Observer observer) {
+    public void loadFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, LoadObserver observer) {
         GetFeedTask getFeedTask = new GetFeedTask(
             authToken,
             user,
@@ -29,7 +29,7 @@ public class StatusService {
         executor.execute(getFeedTask);
     }
 
-    public void loadStory(AuthToken authToken, User user, int pageSize, Status lastStatus, Observer observer) {
+    public void loadStory(AuthToken authToken, User user, int pageSize, Status lastStatus, LoadObserver observer) {
         GetStoryTask getStoryTask = new GetStoryTask(
             authToken,
             user,
@@ -41,7 +41,7 @@ public class StatusService {
         executor.execute(getStoryTask);
     }
 
-    public interface Observer {
+    public interface LoadObserver {
         void onItemsLoaded(List<Status> items, boolean hasMorePages);
         void displayError(String message);
         void displayException(Exception ex);
@@ -51,9 +51,9 @@ public class StatusService {
      * Message handler (i.e., observer) for GetFeedTask.
      */
     private class GetFeedHandler extends Handler {
-        private final Observer observer;
+        private final LoadObserver observer;
 
-        public GetFeedHandler(Observer observer) {
+        public GetFeedHandler(LoadObserver observer) {
             super(Looper.getMainLooper());
             this.observer = observer;
         }
@@ -79,9 +79,9 @@ public class StatusService {
      * Message handler (i.e., observer) for GetStoryTask.
      */
     private class GetStoryHandler extends Handler {
-        private final Observer observer;
+        private final LoadObserver observer;
 
-        public GetStoryHandler(Observer observer) {
+        public GetStoryHandler(LoadObserver observer) {
             super(Looper.getMainLooper());
             this.observer = observer;
         }

@@ -66,7 +66,7 @@ public class FeedPresenter {
         void displayMessage(String message);
     }
 
-    private class StatusServiceObserver implements StatusService.Observer {
+    private class StatusServiceObserver implements StatusService.LoadObserver {
         @Override
         public void onItemsLoaded(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
