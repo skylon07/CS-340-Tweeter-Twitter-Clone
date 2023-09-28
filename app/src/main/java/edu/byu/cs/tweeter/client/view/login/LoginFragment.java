@@ -23,7 +23,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class LoginFragment extends Fragment implements LoginPresenter.View {
     private static final String LOG_TAG = "LoginFragment";
 
-    private Toast loginToast;
+    private Toast currentToast;
     private EditText alias;
     private EditText password;
     private TextView errorView;
@@ -73,13 +73,13 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
     }
 
     public void displayMessage(String message) {
-        loginToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
-        loginToast.show();
+        currentToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        currentToast.show();
     }
 
     public void cancelMessage() {
-        if (loginToast != null) {
-            loginToast.cancel();
+        if (currentToast != null) {
+            currentToast.cancel();
         }
     }
 }
