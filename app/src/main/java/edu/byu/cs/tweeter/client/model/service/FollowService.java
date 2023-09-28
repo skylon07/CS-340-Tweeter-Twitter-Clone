@@ -16,7 +16,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowService {
-    public void loadFollowees(AuthToken authToken, User user, int pageSize, User lastFollowee, Observer observer) {
+    public void loadFollowees(AuthToken authToken, User user, int pageSize, User lastFollowee, LoadItemsObserver observer) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(
             authToken,
             user,
@@ -28,7 +28,7 @@ public class FollowService {
         executor.execute(getFollowingTask);
     }
 
-    public void loadFollowers(AuthToken authToken, User user, int pageSize, User lastFollower, Observer observer) {
+    public void loadFollowers(AuthToken authToken, User user, int pageSize, User lastFollower, LoadItemsObserver observer) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(
             authToken,
             user,
@@ -40,7 +40,7 @@ public class FollowService {
         executor.execute(getFollowersTask);
     }
 
-    public interface Observer {
+    public interface LoadItemsObserver {
         void onItemsLoaded(List<User> items, boolean hasMorePages);
         void displayError(String message);
         void displayException(Exception ex);
@@ -50,9 +50,9 @@ public class FollowService {
      * Message handler (i.e., observer) for GetFollowingTask.
      */
     private class GetFollowingHandler extends Handler {
-        private final Observer observer;
+        private final LoadItemsObserver observer;
 
-        public GetFollowingHandler(Observer observer) {
+        public GetFollowingHandler(LoadItemsObserver observer) {
             super(Looper.getMainLooper());
             this.observer = observer;
         }
@@ -78,9 +78,9 @@ public class FollowService {
      * Message handler (i.e., observer) for GetFollowersTask.
      */
     private class GetFollowersHandler extends Handler {
-        private final Observer observer;
+        private final LoadItemsObserver observer;
 
-        public GetFollowersHandler(Observer observer) {
+        public GetFollowersHandler(LoadItemsObserver observer) {
             super(Looper.getMainLooper());
             this.observer = observer;
         }

@@ -61,7 +61,7 @@ public class FollowersPresenter {
         void displayMessage(String message);
     }
 
-    private class FollowServiceObserver implements FollowService.Observer {
+    private class FollowServiceObserver implements FollowService.LoadItemsObserver {
         @Override
         public void onItemsLoaded(List<User> followees, boolean hasMorePages) {
             isLoading = false;
