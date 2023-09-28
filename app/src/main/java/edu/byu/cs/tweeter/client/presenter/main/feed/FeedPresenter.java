@@ -36,8 +36,7 @@ public class FeedPresenter {
         loadUserProfile(userAlias);
     }
 
-    public void onMentionClick(String mention) {
-        String userAlias = mention;
+    public void onMentionClick(String userAlias) {
         loadUserProfile(userAlias);
     }
 

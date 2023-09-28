@@ -176,8 +176,8 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
                         int start = s.getSpanStart(this);
                         int end = s.getSpanEnd(this);
 
-                        String mention = s.subSequence(start, end).toString();
-                        presenter.onMentionClick(mention);
+                        String userAlias = s.subSequence(start, end).toString();
+                        presenter.onMentionClick(userAlias);
                     }
 
                     @Override
