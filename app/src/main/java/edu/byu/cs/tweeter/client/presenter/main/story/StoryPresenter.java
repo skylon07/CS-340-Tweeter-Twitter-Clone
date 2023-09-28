@@ -66,7 +66,7 @@ public class StoryPresenter {
         void displayMessage(String message);
     }
 
-    private class StatusServiceObserver implements StatusService.LoadObserver {
+    private class StatusServiceObserver implements StatusService.LoadItemsObserver {
         @Override
         public void onItemsLoaded(List<Status> statuses, boolean hasMorePages) {
             isLoading = false;
@@ -93,7 +93,7 @@ public class StoryPresenter {
         }
     }
 
-    private class UserServiceObserver implements UserService.LoadObserver {
+    private class UserServiceObserver implements UserService.LoadItemsObserver {
         @Override
         public void onUserLoaded(User user) {
             view.setCurrentUser(user);
