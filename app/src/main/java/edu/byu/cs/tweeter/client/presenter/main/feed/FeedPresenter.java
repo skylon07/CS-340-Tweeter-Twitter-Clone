@@ -55,7 +55,7 @@ public class FeedPresenter {
             isLoading = true;
             view.setLoadingFooterVisible(true);
             AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-            statusService.loadMoreItems(authToken, user, PAGE_SIZE, lastStatus, new StatusServiceObserver());
+            statusService.loadFeed(authToken, user, PAGE_SIZE, lastStatus, new StatusServiceObserver());
         }
     }
 

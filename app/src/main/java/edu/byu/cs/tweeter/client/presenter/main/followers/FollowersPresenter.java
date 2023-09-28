@@ -50,7 +50,7 @@ public class FollowersPresenter {
             isLoading = true;
             view.setLoadingFooterVisible(true);
             AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-            followService.loadMoreItems(authToken, user, PAGE_SIZE, lastFollower, new FollowServiceObserver());
+            followService.loadFollowers(authToken, user, PAGE_SIZE, lastFollower, new FollowServiceObserver());
         }
     }
 
