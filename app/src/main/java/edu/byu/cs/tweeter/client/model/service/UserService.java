@@ -19,7 +19,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService {
-    public void loadUser(AuthToken authToken, String userAlias, Observer observer) {
+    public void loadUser(AuthToken authToken, String userAlias, LoadObserver observer) {
         GetUserTask getUserTask = new GetUserTask(
             authToken,
             userAlias,
@@ -60,7 +60,7 @@ public class UserService {
         executor.execute(registerTask);
     }
 
-    public interface Observer {
+    public interface LoadObserver {
         void onUserLoaded(User user);
         void displayError(String message);
         void displayException(Exception ex);
@@ -76,9 +76,9 @@ public class UserService {
      * Message handler (i.e., observer) for GetUserTask.
      */
     private class GetUserHandler extends Handler {
-        private final Observer observer;
+        private final LoadObserver observer;
 
-        public GetUserHandler(Observer observer) {
+        public GetUserHandler(LoadObserver observer) {
             super(Looper.getMainLooper());
             this.observer = observer;
         }

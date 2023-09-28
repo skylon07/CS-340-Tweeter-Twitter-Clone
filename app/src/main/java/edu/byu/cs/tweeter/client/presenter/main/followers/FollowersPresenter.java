@@ -88,7 +88,7 @@ public class FollowersPresenter {
         }
     }
 
-    private class UserServiceObserver implements UserService.Observer {
+    private class UserServiceObserver implements UserService.LoadObserver {
         @Override
         public void onUserLoaded(User user) {
             view.setCurrentUser(user);
