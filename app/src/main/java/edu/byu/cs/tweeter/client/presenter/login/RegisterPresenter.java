@@ -27,6 +27,10 @@ public class RegisterPresenter {
         }
     }
 
+    public void onImageUploadClick() {
+        view.openMediaGallery();
+    }
+
     private boolean validateRegistration(String firstName, String lastName, String userAlias, String password, Drawable imageToUpload) {
         if (firstName.length() == 0) {
             view.setErrorText("First Name cannot be empty.");
@@ -61,6 +65,7 @@ public class RegisterPresenter {
 
     public interface View {
         void setCurrentUser(User user);
+        void openMediaGallery();
         void setErrorText(String message);
         void displayMessage(String message);
         void cancelMessage();

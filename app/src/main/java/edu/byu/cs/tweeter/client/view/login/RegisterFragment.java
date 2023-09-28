@@ -69,8 +69,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         imageUploaderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(gallery, RESULT_IMAGE);
+                presenter.onImageUploadClick();
             }
         });
 
@@ -95,6 +94,12 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
         startActivity(intent);
+    }
+
+    @Override
+    public void openMediaGallery() {
+        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, RESULT_IMAGE);
     }
 
     @Override
