@@ -32,18 +32,18 @@ public class FollowingPresenter {
         return isLoading;
     }
 
-    public void onFollowingViewClick(String userName) {
-        loadUserProfile(userName);
+    public void onFollowingViewClick(String userAlias) {
+        loadUserProfile(userAlias);
     }
 
     public void onScrolled(User user) {
         loadMoreItems(user);
     }
 
-    public void loadUserProfile(String userName) {
+    public void loadUserProfile(String userAlias) {
         view.displayMessage("Getting user's profile...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        userService.loadUser(authToken, userName, new UserServiceObserver());
+        userService.loadUser(authToken, userAlias, new UserServiceObserver());
     }
 
     public void loadMoreItems(User user) {

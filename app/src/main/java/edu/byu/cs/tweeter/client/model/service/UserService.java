@@ -14,10 +14,10 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class UserService {
-    public void loadUser(AuthToken authToken, String userName, Observer observer) {
+    public void loadUser(AuthToken authToken, String userAlias, Observer observer) {
         GetUserTask getUserTask = new GetUserTask(
             authToken,
-            userName,
+            userAlias,
             new GetUserHandler(observer)
         );
         ExecutorService executor = Executors.newSingleThreadExecutor();

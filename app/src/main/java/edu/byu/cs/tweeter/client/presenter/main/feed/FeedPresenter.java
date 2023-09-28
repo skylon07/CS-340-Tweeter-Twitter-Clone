@@ -32,23 +32,23 @@ public class FeedPresenter {
         return hasMorePages;
     }
 
-    public void onFeedItemClick(String userName) {
-        loadUserProfile(userName);
+    public void onFeedItemClick(String userAlias) {
+        loadUserProfile(userAlias);
     }
 
     public void onMentionClick(String mention) {
-        String userName = mention;
-        loadUserProfile(userName);
+        String userAlias = mention;
+        loadUserProfile(userAlias);
     }
 
     public void onScrolled(User user) {
         loadMoreItems(user);
     }
 
-    public void loadUserProfile(String userName) {
+    public void loadUserProfile(String userAlias) {
         view.displayMessage("Getting user's profile...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        userService.loadUser(authToken, userName, new UserServiceObserver());
+        userService.loadUser(authToken, userAlias, new UserServiceObserver());
     }
 
     public void loadMoreItems(User user) {
