@@ -1,11 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service;
 
 import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
-import androidx.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
@@ -16,31 +11,37 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SuccessHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UserHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UserAuthHandler;
+import edu.byu.cs.tweeter.client.model.service.observer.ResultObserver;
+import edu.byu.cs.tweeter.client.model.service.observer.SuccessObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.util.Pair;
 
 public class UserService {
-    public void loadUser(AuthToken authToken, String userAlias, LoadItemsObserver observer) {
+    public void loadUser(AuthToken authToken, String userAlias, ResultObserver<User> observer) {
         GetUserTask getUserTask = new GetUserTask(
             authToken,
             userAlias,
-            new GetUserHandler(observer)
+            new UserHandler(observer)
         );
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getUserTask);
     }
 
-    public void loginUser(String userAlias, String password, LoginObserver observer) {
+    public void loginUser(String userAlias, String password, ResultObserver<Pair<User, AuthToken>> observer) {
         LoginTask loginTask = new LoginTask(
             userAlias,
             password,
-            new LoginHandler(observer)
+            new UserAuthHandler(observer)
         );
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(loginTask);
     }
 
-    public void registerUser(String firstName, String lastName, String userAlias, String password, Bitmap imageToUpload, LoginObserver observer) {
+    public void registerUser(String firstName, String lastName, String userAlias, String password, Bitmap imageToUpload, ResultObserver<Pair<User, AuthToken>> observer) {
         // Convert image to byte array.
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         imageToUpload.compress(Bitmap.CompressFormat.JPEG, 100, bos);
@@ -54,143 +55,19 @@ public class UserService {
             userAlias,
             password,
             imageBytesBase64,
-            new RegisterHandler(observer)
+            new UserAuthHandler(observer)
         );
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(registerTask);
     }
 
-    public void logoutUser(AuthToken authToken, LogoutObserver observer) {
+    public void logoutUser(AuthToken authToken, SuccessObserver observer) {
         LogoutTask logoutTask = new LogoutTask(
             authToken,
-            new LogoutHandler(observer)
+            new SuccessHandler(observer)
         );
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
-    }
-
-    public interface LoadItemsObserver {
-        void onUserLoaded(User user);
-        void displayError(String message);
-        void displayException(Exception ex);
-    }
-
-    public interface LoginObserver {
-        void onUserLoggedIn(User user, AuthToken authToken);
-        void displayError(String message);
-        void displayException(Exception ex);
-    }
-
-    public interface LogoutObserver {
-        void onUserLoggedOut();
-        void displayError(String message);
-        void displayException(Exception ex);
-    }
-
-    /**
-     * Message handler (i.e., observer) for GetUserTask.
-     */
-    private class GetUserHandler extends Handler {
-        private final LoadItemsObserver observer;
-
-        public GetUserHandler(LoadItemsObserver observer) {
-            super(Looper.getMainLooper());
-            this.observer = observer;
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(GetUserTask.SUCCESS_KEY);
-            if (success) {
-                User user = (User) msg.getData().getSerializable(GetUserTask.USER_KEY);
-                observer.onUserLoaded(user);
-            } else if (msg.getData().containsKey(GetUserTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(GetUserTask.MESSAGE_KEY);
-                observer.displayError(message);
-            } else if (msg.getData().containsKey(GetUserTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(GetUserTask.EXCEPTION_KEY);
-                observer.displayException(ex);
-            }
-        }
-    }
-
-    /**
-     * Message handler (i.e., observer) for LoginTask
-     */
-    private class LoginHandler extends Handler {
-        private final LoginObserver observer;
-
-        public LoginHandler(LoginObserver observer) {
-            super(Looper.getMainLooper());
-            this.observer = observer;
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(LoginTask.SUCCESS_KEY);
-            if (success) {
-                User loggedInUser = (User) msg.getData().getSerializable(LoginTask.USER_KEY);
-                AuthToken authToken = (AuthToken) msg.getData().getSerializable(LoginTask.AUTH_TOKEN_KEY);
-                observer.onUserLoggedIn(loggedInUser, authToken);
-            } else if (msg.getData().containsKey(LoginTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(LoginTask.MESSAGE_KEY);
-                observer.displayError(message);
-            } else if (msg.getData().containsKey(LoginTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(LoginTask.EXCEPTION_KEY);
-                observer.displayException(ex);
-            }
-        }
-    }
-
-    // RegisterHandler
-
-    private class RegisterHandler extends Handler {
-        private final LoginObserver observer;
-
-        public RegisterHandler(LoginObserver observer) {
-            super(Looper.getMainLooper());
-            this.observer = observer;
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(RegisterTask.SUCCESS_KEY);
-            if (success) {
-                User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
-                AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
-                observer.onUserLoggedIn(registeredUser, authToken);
-            } else if (msg.getData().containsKey(RegisterTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(RegisterTask.MESSAGE_KEY);
-                observer.displayError(message);
-            } else if (msg.getData().containsKey(RegisterTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(RegisterTask.EXCEPTION_KEY);
-                observer.displayException(ex);
-            }
-        }
-    }
-
-    // LogoutHandler
-    private class LogoutHandler extends Handler {
-        private LogoutObserver observer;
-
-        public LogoutHandler(LogoutObserver observer) {
-            super(Looper.getMainLooper());
-            this.observer = observer;
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            boolean success = msg.getData().getBoolean(LogoutTask.SUCCESS_KEY);
-            if (success) {
-                observer.onUserLoggedOut();
-            } else if (msg.getData().containsKey(LogoutTask.MESSAGE_KEY)) {
-                String message = msg.getData().getString(LogoutTask.MESSAGE_KEY);
-                observer.displayError(message);
-            } else if (msg.getData().containsKey(LogoutTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) msg.getData().getSerializable(LogoutTask.EXCEPTION_KEY);
-                observer.displayException(ex);
-            }
-        }
     }
 }
