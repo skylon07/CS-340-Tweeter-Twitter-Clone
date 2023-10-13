@@ -22,8 +22,8 @@ public class StoryPresenter extends PagingPresenter<Status, StoryPresenter.View<
     }
 
     public void onScrolled(User user) {
-            loadMoreItems(user);
-        }
+        loadMoreItems(user);
+    }
 
     @Override
     protected void loadItemsFromService(User user, AuthToken authToken) {
