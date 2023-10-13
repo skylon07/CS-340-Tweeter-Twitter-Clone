@@ -6,14 +6,17 @@ import android.graphics.drawable.Drawable;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.presenter.BasePresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.util.Pair;
 
-public class RegisterPresenter {
+public class RegisterPresenter extends BasePresenter {
     private View view;
     private UserService userService = new UserService();
 
     public RegisterPresenter(View view) {
+        super(view);
         this.view = view;
     }
 
@@ -63,32 +66,28 @@ public class RegisterPresenter {
         return true;
     }
 
-    public interface View {
+    public interface View extends BasePresenter.View {
         void setCurrentUser(User user);
         void openMediaGallery();
         void setErrorText(String message);
-        void displayMessage(String message);
         void cancelMessage();
     }
 
-    private class UserServiceObserver implements UserService.LoginObserver {
+    private class UserServiceObserver extends ServiceResultObserver<Pair<User, AuthToken>> {
+        public UserServiceObserver() {
+            super("register");
+        }
+
         @Override
-        public void onUserLoggedIn(User user, AuthToken authToken) {
+        public void onResultLoaded(Pair<User, AuthToken> result) {
+            User user = result.getFirst();
+            AuthToken authToken = result.getSecond();
+
             Cache.getInstance().setCurrUser(user);
             Cache.getInstance().setCurrUserAuthToken(authToken);
             view.setCurrentUser(user);
             view.cancelMessage();
             view.displayMessage("Hello " + user.getName());
-        }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to register: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to register because of exception: " + ex.getMessage());
         }
     }
 }

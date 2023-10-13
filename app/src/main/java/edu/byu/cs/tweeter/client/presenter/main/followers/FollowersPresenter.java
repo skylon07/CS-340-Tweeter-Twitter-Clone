@@ -5,10 +5,12 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.presenter.BasePresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.util.Pair;
 
-public class FollowersPresenter {
+public class FollowersPresenter extends BasePresenter {
     private static final int PAGE_SIZE = 10;
 
     private User lastFollower;
@@ -20,6 +22,7 @@ public class FollowersPresenter {
     private final UserService userService = new UserService();
 
     public FollowersPresenter(View view) {
+        super(view);
         this.view = view;
     }
 
@@ -54,16 +57,22 @@ public class FollowersPresenter {
         }
     }
 
-    public interface View {
+    public interface View extends BasePresenter.View {
         void addFollowers(List<User> followers);
         void setLoadingFooterVisible(boolean visible);
         void setCurrentUser(User user);
-        void displayMessage(String message);
     }
 
-    private class FollowServiceObserver implements FollowService.LoadItemsObserver {
+    private class FollowServiceObserver extends ServiceResultObserver<Pair<List<User>, Boolean>> {
+        public FollowServiceObserver() {
+            super("get follower");
+        }
+
         @Override
-        public void onItemsLoaded(List<User> followees, boolean hasMorePages) {
+        public void onResultLoaded(Pair<List<User>, Boolean> result) {
+            List<User> followees = result.getFirst();
+            Boolean hasMorePages = result.getSecond();
+
             isLoading = false;
             view.setLoadingFooterVisible(false);
             FollowersPresenter.this.hasMorePages = hasMorePages;
@@ -72,36 +81,28 @@ public class FollowersPresenter {
         }
 
         @Override
-        public void displayError(String message) {
+        public void handleFailure(String message) {
+            super.handleFailure(message);
             isLoading = false;
             view.setLoadingFooterVisible(false);
-
-            view.displayMessage("Failed to get follower: " + message);
         }
 
         @Override
-        public void displayException(Exception ex) {
+        public void handleException(Exception exception) {
+            super.handleException(exception);
             isLoading = false;
             view.setLoadingFooterVisible(false);
-
-            view.displayMessage("Failed to get follower because of exception: " + ex.getMessage());
         }
     }
 
-    private class UserServiceObserver implements UserService.LoadItemsObserver {
+    private class UserServiceObserver extends ServiceResultObserver<User> {
+        public UserServiceObserver() {
+            super("get user");
+        }
+
         @Override
-        public void onUserLoaded(User user) {
+        public void onResultLoaded(User user) {
             view.setCurrentUser(user);
-        }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to get user: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to get user because of exception: " + ex.getMessage());
         }
     }
 }

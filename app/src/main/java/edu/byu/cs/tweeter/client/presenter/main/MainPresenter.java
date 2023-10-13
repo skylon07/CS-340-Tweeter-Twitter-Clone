@@ -1,35 +1,23 @@
 package edu.byu.cs.tweeter.client.presenter.main;
 
-import android.util.Log;
-import android.widget.Toast;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
-import edu.byu.cs.tweeter.client.view.main.MainActivity;
+import edu.byu.cs.tweeter.client.model.service.observer.ResultObserver;
+import edu.byu.cs.tweeter.client.model.service.observer.SuccessObserver;
+import edu.byu.cs.tweeter.client.presenter.BasePresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class MainPresenter {
+public class MainPresenter extends BasePresenter {
     private View view;
     private StatusService statusService = new StatusService();
     private FollowService followService = new FollowService();
     private UserService userService = new UserService();
 
     public MainPresenter(View view) {
+        super(view);
         this.view = view;
     }
 
@@ -84,141 +72,108 @@ public class MainPresenter {
         userService.logoutUser(authToken, new UserServiceLogoutObserver());
     }
 
-    public interface View {
+    public interface View extends BasePresenter.View {
         void completeLogout();
         void showStatusDialog();
         void setFollowerCount(int count);
         void setFollowingCount(int count);
         void setFollowingSelectedUser(boolean isFollowing);
         void setFollowButtonEnabled(boolean enabled);
-        void displayMessage(String message);
         void cancelMessage();
     }
 
-    private class UserServiceLogoutObserver implements UserService.LogoutObserver {
+    private class UserServiceLogoutObserver extends ServiceSuccessObserver {
+        public UserServiceLogoutObserver() {
+            super("logout");
+        }
+
         @Override
-        public void onUserLoggedOut() {
+        public void handleSuccess() {
             Cache.getInstance().clearCache();
             view.completeLogout();
         }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to logout: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to logout because of exception: " + ex.getMessage());
-        }
     }
 
-    private class StatusServiceObserver implements StatusService.CreateObserver {
+    private class StatusServiceObserver extends ServiceSuccessObserver {
+        public StatusServiceObserver() {
+            super("post status");
+        }
+
         @Override
-        public void onStatusCreated() {
+        public void handleFailure(String message) {
+            super.handleFailure(message);
+            view.cancelMessage();
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            super.handleException(exception);
+            view.cancelMessage();
+        }
+
+        @Override
+        public void handleSuccess() {
             view.cancelMessage();
             view.displayMessage("Successfully Posted!");
         }
-
-        @Override
-        public void displayError(String message) {
-            view.cancelMessage();
-            view.displayMessage("Failed to post status: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.cancelMessage();
-            view.displayMessage("Failed to post status because of exception: " + ex.getMessage());
-        }
     }
 
-    private class FollowersCountObserver implements FollowService.LoadCountObserver {
+    private class FollowersCountObserver extends ServiceResultObserver<Integer> {
+        public FollowersCountObserver() {
+            super("get followers count");
+        }
+
         @Override
-        public void onCountLoaded(int followersCount) {
+        public void onResultLoaded(Integer followersCount) {
             view.setFollowerCount(followersCount);
         }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to get followers count: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to get followers count because of exception: " + ex.getMessage());
-        }
     }
 
-    private class FollowingCountObserver implements FollowService.LoadCountObserver {
+    private class FollowingCountObserver extends ServiceResultObserver<Integer> {
+        public FollowingCountObserver() {
+            super("get following count");
+        }
+
         @Override
-        public void onCountLoaded(int followingCount) {
+        public void onResultLoaded(Integer followingCount) {
             view.setFollowingCount(followingCount);
         }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to get following count: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to get following count because of exception: " + ex.getMessage());
-        }
     }
 
-    private class IsFollowerObserver implements FollowService.TruthObserver {
+    private class IsFollowerObserver extends ServiceResultObserver<Boolean> {
+        public IsFollowerObserver() {
+            super("determine following relationship");
+        }
+
         @Override
-        public void onLoaded(boolean isFollower) {
+        public void onResultLoaded(Boolean isFollower) {
             view.setFollowingSelectedUser(isFollower);
         }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to determine following relationship: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to determine following relationship because of exception: " + ex.getMessage());
-        }
     }
 
-    private class FollowRequestObserver implements FollowService.TruthObserver {
+    private class FollowRequestObserver extends ServiceSuccessObserver {
+        public FollowRequestObserver() {
+            super("follow");
+        }
+
         @Override
-        public void onLoaded(boolean loaded) {
+        public void handleSuccess() {
             updateFollowingAndFollowers();
             view.setFollowingSelectedUser(true);
             view.setFollowButtonEnabled(true);
         }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to follow: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to follow because of exception: " + ex.getMessage());
-        }
     }
 
-    private class UnfollowRequestObserver implements FollowService.TruthObserver {
+    private class UnfollowRequestObserver extends ServiceSuccessObserver {
+        public UnfollowRequestObserver() {
+            super("unfollow");
+        }
+
         @Override
-        public void onLoaded(boolean loaded) {
+        public void handleSuccess() {
             updateFollowingAndFollowers();
             view.setFollowingSelectedUser(false);
             view.setFollowButtonEnabled(true);
-        }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to unfollow: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to unfollow because of exception: " + ex.getMessage());
         }
     }
 }

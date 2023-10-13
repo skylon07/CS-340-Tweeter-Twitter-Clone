@@ -5,11 +5,13 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.presenter.BasePresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.util.Pair;
 
-public class FeedPresenter {
+public class FeedPresenter extends BasePresenter {
     private static final int PAGE_SIZE = 10;
 
     private Status lastStatus;
@@ -21,6 +23,7 @@ public class FeedPresenter {
     private final UserService userService = new UserService();
 
     public FeedPresenter(View view) {
+        super(view);
         this.view = view;
     }
 
@@ -59,16 +62,22 @@ public class FeedPresenter {
         }
     }
 
-    public interface View {
+    public interface View extends BasePresenter.View {
         void addStatuses(List<Status> statuses);
         void setLoadingFooterVisible(boolean visible);
         void setCurrentUser(User user);
-        void displayMessage(String message);
     }
 
-    private class StatusServiceObserver implements StatusService.LoadItemsObserver {
+    private class StatusServiceObserver extends ServiceResultObserver<Pair<List<Status>, Boolean>> {
+        public StatusServiceObserver() {
+            super("get feed");
+        }
+
         @Override
-        public void onItemsLoaded(List<Status> statuses, boolean hasMorePages) {
+        public void onResultLoaded(Pair<List<Status>, Boolean> result) {
+            List<Status> statuses = result.getFirst();
+            Boolean hasMorePages = result.getSecond();
+
             isLoading = false;
             view.setLoadingFooterVisible(false);
             FeedPresenter.this.hasMorePages = hasMorePages;
@@ -77,36 +86,28 @@ public class FeedPresenter {
         }
 
         @Override
-        public void displayError(String message) {
+        public void handleFailure(String message) {
+            super.handleFailure(message);
             isLoading = false;
             view.setLoadingFooterVisible(false);
-
-            view.displayMessage("Failed to get feed: " + message);
         }
 
         @Override
-        public void displayException(Exception ex) {
+        public void handleException(Exception exception) {
+            super.handleException(exception);
             isLoading = false;
             view.setLoadingFooterVisible(false);
-
-            view.displayMessage("Failed to get feed because of exception: " + ex.getMessage());
         }
     }
 
-    private class UserServiceObserver implements UserService.LoadItemsObserver {
+    private class UserServiceObserver extends ServiceResultObserver<User> {
+        public UserServiceObserver() {
+            super("get user");
+        }
+
         @Override
-        public void onUserLoaded(User user) {
+        public void onResultLoaded(User user) {
             view.setCurrentUser(user);
-        }
-
-        @Override
-        public void displayError(String message) {
-            view.displayMessage("Failed to get user: " + message);
-        }
-
-        @Override
-        public void displayException(Exception ex) {
-            view.displayMessage("Failed to get user because of exception: " + ex.getMessage());
         }
     }
 }
