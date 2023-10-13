@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
@@ -20,15 +18,14 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class UserService {
+public class UserService extends BaseService {
     public void loadUser(AuthToken authToken, String userAlias, ResultObserver<User> observer) {
         GetUserTask getUserTask = new GetUserTask(
             authToken,
             userAlias,
             new UserHandler(observer)
         );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getUserTask);
+        executeTask(getUserTask);
     }
 
     public void loginUser(String userAlias, String password, ResultObserver<Pair<User, AuthToken>> observer) {
@@ -37,8 +34,7 @@ public class UserService {
             password,
             new UserAuthHandler(observer)
         );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(loginTask);
+        executeTask(loginTask);
     }
 
     public void registerUser(String firstName, String lastName, String userAlias, String password, Bitmap imageToUpload, ResultObserver<Pair<User, AuthToken>> observer) {
@@ -58,8 +54,7 @@ public class UserService {
             new UserAuthHandler(observer)
         );
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(registerTask);
+        executeTask(registerTask);
     }
 
     public void logoutUser(AuthToken authToken, SuccessObserver observer) {
@@ -67,7 +62,6 @@ public class UserService {
             authToken,
             new SuccessHandler(observer)
         );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(logoutTask);
+        executeTask(logoutTask);
     }
 }

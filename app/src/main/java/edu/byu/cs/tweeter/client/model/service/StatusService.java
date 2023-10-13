@@ -2,8 +2,6 @@ package edu.byu.cs.tweeter.client.model.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
@@ -17,7 +15,7 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class StatusService {
+public class StatusService extends BaseService {
     public void loadFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, ResultObserver<Pair<List<Status>, Boolean>> observer) {
         GetFeedTask getFeedTask = new GetFeedTask(
             authToken,
@@ -26,8 +24,7 @@ public class StatusService {
             lastStatus,
             new StatusPageHandler(observer)
         );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getFeedTask);
+        executeTask(getFeedTask);
     }
 
     public void loadStory(AuthToken authToken, User user, int pageSize, Status lastStatus, ResultObserver<Pair<List<Status>, Boolean>> observer) {
@@ -38,15 +35,13 @@ public class StatusService {
             lastStatus,
             new StatusPageHandler(observer)
         );
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getStoryTask);
+        executeTask(getStoryTask);
     }
 
     public void createStatus(AuthToken authToken, User user, String post, SuccessObserver observer) {
         Status newStatus = new Status(post, user, System.currentTimeMillis(), parseURLs(post), parseMentions(post));
         PostStatusTask statusTask = new PostStatusTask(authToken, newStatus, new SuccessHandler(observer));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(statusTask);
+        executeTask(statusTask);
     }
 
     private List<String> parseURLs(String post) {
