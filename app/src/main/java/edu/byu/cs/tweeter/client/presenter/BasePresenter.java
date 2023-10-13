@@ -3,10 +3,10 @@ package edu.byu.cs.tweeter.client.presenter;
 import edu.byu.cs.tweeter.client.model.service.observer.ResultObserver;
 import edu.byu.cs.tweeter.client.model.service.observer.SuccessObserver;
 
-public abstract class BasePresenter {
-    protected View view;
+public abstract class BasePresenter<ViewType extends BasePresenter.View> {
+    protected final ViewType view;
 
-    public BasePresenter(View view) {
+    public BasePresenter(ViewType view) {
         this.view = view;
     }
 

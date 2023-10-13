@@ -10,15 +10,13 @@ import edu.byu.cs.tweeter.client.presenter.BasePresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class MainPresenter extends BasePresenter {
-    private View view;
+public class MainPresenter extends BasePresenter<MainPresenter.View> {
     private StatusService statusService = new StatusService();
     private FollowService followService = new FollowService();
     private UserService userService = new UserService();
 
     public MainPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public void onFabClick() {

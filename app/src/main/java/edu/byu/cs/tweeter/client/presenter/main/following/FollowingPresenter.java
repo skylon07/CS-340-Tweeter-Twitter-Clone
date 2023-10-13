@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class FollowingPresenter extends BasePresenter {
+public class FollowingPresenter extends BasePresenter<FollowingPresenter.View> {
     private static final int PAGE_SIZE = 10;
 
     private User lastFollowee;
@@ -20,11 +20,9 @@ public class FollowingPresenter extends BasePresenter {
     private final FollowService followService = new FollowService();
     private final UserService userService = new UserService();
 
-    private final View view;
 
     public FollowingPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public boolean hasMorePages() {

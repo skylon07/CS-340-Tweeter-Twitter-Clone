@@ -7,13 +7,11 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class LoginPresenter extends BasePresenter {
-    private View view;
+public class LoginPresenter extends BasePresenter<LoginPresenter.View> {
     private UserService userService = new UserService();
 
     public LoginPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public void onLoginClick(String userAlias, String password) {

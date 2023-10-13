@@ -10,20 +10,18 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class FollowersPresenter extends BasePresenter {
+public class FollowersPresenter extends BasePresenter<FollowersPresenter.View> {
     private static final int PAGE_SIZE = 10;
 
     private User lastFollower;
     private boolean hasMorePages;
     private boolean isLoading;
 
-    private final View view;
     private final FollowService followService = new FollowService();
     private final UserService userService = new UserService();
 
     public FollowersPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public boolean hasMorePages() {

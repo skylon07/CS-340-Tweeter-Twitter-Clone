@@ -11,20 +11,18 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class StoryPresenter extends BasePresenter {
+public class StoryPresenter extends BasePresenter<StoryPresenter.View> {
     private static final int PAGE_SIZE = 10;
 
     private Status lastStatus;
     private boolean hasMorePages;
     private boolean isLoading;
 
-    private final View view;
     private final StatusService statusService = new StatusService();
     private final UserService userService = new UserService();
 
     public StoryPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public boolean isLoading() {

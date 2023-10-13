@@ -11,13 +11,11 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.Pair;
 
-public class RegisterPresenter extends BasePresenter {
-    private View view;
+public class RegisterPresenter extends BasePresenter<RegisterPresenter.View> {
     private UserService userService = new UserService();
 
     public RegisterPresenter(View view) {
         super(view);
-        this.view = view;
     }
 
     public void onRegisterClick(String firstName, String lastName, String userAlias, String password, Drawable imageToUpload) {
