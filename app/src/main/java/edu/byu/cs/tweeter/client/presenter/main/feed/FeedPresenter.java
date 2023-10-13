@@ -29,12 +29,6 @@ public class FeedPresenter extends PagingPresenter<Status, FeedPresenter.View<St
         loadMoreItems(user);
     }
 
-    public void loadUserProfile(String userAlias) {
-        view.displayMessage("Getting user's profile...");
-        AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        userService.loadUser(authToken, userAlias, new NavigateToUserObserver());
-    }
-
     @Override
     protected void loadItemsFromService(User user, AuthToken authToken) {
         statusService.loadFeed(authToken, user, PAGE_SIZE, getLastItem(), new PagingServiceObserver("get feed"));

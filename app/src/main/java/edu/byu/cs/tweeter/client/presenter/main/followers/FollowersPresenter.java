@@ -23,12 +23,6 @@ public class FollowersPresenter extends PagingPresenter<User, FollowersPresenter
         loadMoreItems(user);
     }
 
-    public void loadUserProfile(String userAlias) {
-        view.displayMessage("Getting user's profile...");
-        AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        userService.loadUser(authToken, userAlias, new NavigateToUserObserver());
-    }
-
     @Override
     protected void loadItemsFromService(User user, AuthToken authToken) {
         followService.loadFollowers(authToken, user, PAGE_SIZE, getLastItem(), new PagingServiceObserver("get follower"));
