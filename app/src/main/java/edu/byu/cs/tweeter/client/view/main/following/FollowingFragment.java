@@ -31,7 +31,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * Implements the "Following" tab.
  */
-public class FollowingFragment extends Fragment implements FollowingPresenter.View {
+public class FollowingFragment extends Fragment implements FollowingPresenter.View<User> {
 
     private static final String LOG_TAG = "FollowingFragment";
     private static final String USER_KEY = "UserKey";
@@ -84,7 +84,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
         return view;
     }
 
-    public void addFollowees(List<User> followees) {
+    public void addItems(List<User> followees) {
         followingRecyclerViewAdapter.addItems(followees);
     }
 

@@ -40,7 +40,7 @@ import edu.byu.cs.tweeter.util.Timestamp;
 /**
  * Implements the "Feed" tab.
  */
-public class FeedFragment extends Fragment implements FeedPresenter.View {
+public class FeedFragment extends Fragment implements FeedPresenter.View<Status> {
     private static final String LOG_TAG = "FeedFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -94,7 +94,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
     }
 
     @Override
-    public void addStatuses(List<Status> statuses) {
+    public void addItems(List<Status> statuses) {
         feedRecyclerViewAdapter.addItems(statuses);
     }
 

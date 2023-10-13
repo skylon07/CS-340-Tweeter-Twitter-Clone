@@ -1,36 +1,20 @@
 package edu.byu.cs.tweeter.client.presenter.main.feed;
 
-import java.util.List;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.presenter.BasePresenter;
+import edu.byu.cs.tweeter.client.presenter.PagingPresenter;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
 
-public class FeedPresenter extends BasePresenter<FeedPresenter.View> {
-    private static final int PAGE_SIZE = 10;
-
-    private Status lastStatus;
-    private boolean hasMorePages;
-    private boolean isLoading;
+public class FeedPresenter extends PagingPresenter<Status, FeedPresenter.View<Status>> {
 
     private final StatusService statusService = new StatusService();
     private final UserService userService = new UserService();
 
-    public FeedPresenter(View view) {
+    public FeedPresenter(View<Status> view) {
         super(view);
-    }
-
-    public boolean isLoading() {
-        return isLoading;
-    }
-
-    public boolean hasMorePages() {
-        return hasMorePages;
     }
 
     public void onFeedItemClick(String userAlias) {
@@ -48,64 +32,11 @@ public class FeedPresenter extends BasePresenter<FeedPresenter.View> {
     public void loadUserProfile(String userAlias) {
         view.displayMessage("Getting user's profile...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        userService.loadUser(authToken, userAlias, new UserServiceObserver());
+        userService.loadUser(authToken, userAlias, new NavigateToUserObserver());
     }
 
-    public void loadMoreItems(User user) {
-        if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
-            isLoading = true;
-            view.setLoadingFooterVisible(true);
-            AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-            statusService.loadFeed(authToken, user, PAGE_SIZE, lastStatus, new StatusServiceObserver());
-        }
-    }
-
-    public interface View extends BasePresenter.View {
-        void addStatuses(List<Status> statuses);
-        void setLoadingFooterVisible(boolean visible);
-        void setCurrentUser(User user);
-    }
-
-    private class StatusServiceObserver extends ServiceResultObserver<Pair<List<Status>, Boolean>> {
-        public StatusServiceObserver() {
-            super("get feed");
-        }
-
-        @Override
-        public void onResultLoaded(Pair<List<Status>, Boolean> result) {
-            List<Status> statuses = result.getFirst();
-            Boolean hasMorePages = result.getSecond();
-
-            isLoading = false;
-            view.setLoadingFooterVisible(false);
-            FeedPresenter.this.hasMorePages = hasMorePages;
-            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
-            view.addStatuses(statuses);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            super.handleFailure(message);
-            isLoading = false;
-            view.setLoadingFooterVisible(false);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            super.handleException(exception);
-            isLoading = false;
-            view.setLoadingFooterVisible(false);
-        }
-    }
-
-    private class UserServiceObserver extends ServiceResultObserver<User> {
-        public UserServiceObserver() {
-            super("get user");
-        }
-
-        @Override
-        public void onResultLoaded(User user) {
-            view.setCurrentUser(user);
-        }
+    @Override
+    protected void loadItemsFromService(User user, AuthToken authToken) {
+        statusService.loadFeed(authToken, user, PAGE_SIZE, getLastItem(), new PagingServiceObserver("get feed"));
     }
 }

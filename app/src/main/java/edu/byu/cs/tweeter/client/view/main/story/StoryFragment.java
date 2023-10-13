@@ -40,7 +40,7 @@ import edu.byu.cs.tweeter.util.Timestamp;
 /**
  * Implements the "Story" tab.
  */
-public class StoryFragment extends Fragment implements StoryPresenter.View {
+public class StoryFragment extends Fragment implements StoryPresenter.View<Status> {
     private static final String LOG_TAG = "StoryFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -94,7 +94,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
     }
 
     @Override
-    public void addStatuses(List<Status> statuses) {
+    public void addItems(List<Status> statuses) {
         storyRecyclerViewAdapter.addItems(statuses);
     }
 

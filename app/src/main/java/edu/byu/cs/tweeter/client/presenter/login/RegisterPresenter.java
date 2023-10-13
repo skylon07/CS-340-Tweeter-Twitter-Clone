@@ -4,14 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.presenter.BasePresenter;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import edu.byu.cs.tweeter.client.presenter.AuthenticatingPresenter;
 
-public class RegisterPresenter extends BasePresenter<RegisterPresenter.View> {
+public class RegisterPresenter extends AuthenticatingPresenter<RegisterPresenter.View> {
     private UserService userService = new UserService();
 
     public RegisterPresenter(View view) {
@@ -24,7 +20,7 @@ public class RegisterPresenter extends BasePresenter<RegisterPresenter.View> {
             view.displayMessage("Registering...");
 
             Bitmap image = ((BitmapDrawable) imageToUpload).getBitmap();
-            userService.registerUser(firstName, lastName, userAlias, password, image, new UserServiceObserver());
+            userService.registerUser(firstName, lastName, userAlias, password, image, new UserServiceAuthenticationObserver("register"));
         }
     }
 
@@ -64,28 +60,8 @@ public class RegisterPresenter extends BasePresenter<RegisterPresenter.View> {
         return true;
     }
 
-    public interface View extends BasePresenter.View {
-        void setCurrentUser(User user);
+    public interface View extends AuthenticatingPresenter.View {
         void openMediaGallery();
         void setErrorText(String message);
-        void cancelMessage();
-    }
-
-    private class UserServiceObserver extends ServiceResultObserver<Pair<User, AuthToken>> {
-        public UserServiceObserver() {
-            super("register");
-        }
-
-        @Override
-        public void onResultLoaded(Pair<User, AuthToken> result) {
-            User user = result.getFirst();
-            AuthToken authToken = result.getSecond();
-
-            Cache.getInstance().setCurrUser(user);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-            view.setCurrentUser(user);
-            view.cancelMessage();
-            view.displayMessage("Hello " + user.getName());
-        }
     }
 }
