@@ -9,12 +9,14 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class MainPresenter extends BasePresenter<MainPresenter.View> {
-    private StatusService statusService = new StatusService();
+    private StatusService statusService;
     private FollowService followService = new FollowService();
     private UserService userService = new UserService();
 
-    public MainPresenter(View view) {
+    public MainPresenter(View view, StatusService statusService) {
         super(view);
+        this.statusService = statusService;
+
     }
 
     public void onFabClick() {
@@ -30,7 +32,7 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
         view.displayMessage("Posting Status...");
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
         User user = Cache.getInstance().getCurrUser();
-        statusService.createStatus(authToken, user, post, new StatusServiceObserver());
+        statusService.createStatus(authToken, user, post, createStatusObserver());
     }
 
     public void onFollowButtonClick(boolean isFollowingButton, User selectedUser) {
@@ -90,7 +92,7 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
         }
     }
 
-    private class StatusServiceObserver extends ServiceSuccessObserver {
+    public class StatusServiceObserver extends ServiceSuccessObserver {
         public StatusServiceObserver() {
             super("post status");
         }
@@ -112,6 +114,10 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
             view.cancelMessage();
             view.displayMessage("Successfully Posted!");
         }
+    }
+
+    public StatusServiceObserver createStatusObserver() {
+        return new StatusServiceObserver();
     }
 
     private class FollowersCountObserver extends ServiceResultObserver<Integer> {

@@ -34,6 +34,14 @@ android {
             useJUnitPlatform()
         }
     }
+
+    sourceSets {
+        test {
+            resources {
+                srcDir "test"
+            }
+        }
+    }
 }
 
 dependencies {
