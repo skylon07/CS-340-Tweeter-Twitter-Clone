@@ -2,6 +2,7 @@ package edu.byu.cs.tweeter.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -114,17 +115,19 @@ public class FakeData {
         List<User> fakeUsers = getFakeUsers();
         long timestampStart = Long.valueOf("1679189669252");
         int numFakeUsers = fakeUsers.size();
+
         for (int i = 0; i < 2; ++i) {
             for (int j = 0; j < fakeUsers.size(); ++j) {
                 User sender = fakeUsers.get(j);
                 User mention = ((j < fakeUsers.size() - 1) ? fakeUsers.get(j + 1) : fakeUsers.get(0));
-                List<String> mentions = Arrays.asList(mention.getAlias());
+                List<String> mentions = Collections.singletonList(mention.getAlias());
                 String url = "https://byu.edu";
-                List<String> urls = Arrays.asList(url);
+                List<String> urls = Collections.singletonList(url);
                 String post = "Post " + i + " " + j +
                         "\nMy friend " + mention.getAlias() + " likes this website" +
                         "\n" + url;
-                Status status = new Status(post, sender, timestampStart + 1000 * (i * numFakeUsers + j), urls, mentions);
+                Long timestamp = timestampStart + 1000 * (i * numFakeUsers + j);
+                Status status = new Status(post, sender, timestamp, urls, mentions);
                 allStatuses.add(status);
             }
         }
@@ -164,7 +167,7 @@ public class FakeData {
      */
     public Pair<List<User>, Boolean> getPageOfUsers(User lastUser, int limit, User omit) {
 
-        Pair<List<User>, Boolean> result = new Pair<>(new ArrayList<User>(), false);
+        Pair<List<User>, Boolean> result = new Pair<>(new ArrayList<>(), false);
 
         int index = 0;
         List<User> fakeUsers = getFakeUsers();
@@ -201,7 +204,7 @@ public class FakeData {
      */
     public Pair<List<Status>, Boolean> getPageOfStatus(Status lastStatus, int limit) {
 
-        Pair<List<Status>, Boolean> result = new Pair<>(new ArrayList<Status>(), false);
+        Pair<List<Status>, Boolean> result = new Pair<>(new ArrayList<>(), false);
 
         int index = 0;
         List<Status> fakeStatuses = getFakeStatuses();
@@ -210,7 +213,7 @@ public class FakeData {
             for (int i = 0; i < fakeStatuses.size(); ++i) {
                 Status curStatus = fakeStatuses.get(i);
                 if (curStatus.getUser().getAlias().equals(lastStatus.getUser().getAlias()) &&
-                        curStatus.getTimestamp() == lastStatus.getTimestamp()) {
+                        curStatus.getTimestamp().equals(lastStatus.getTimestamp())) {
                     index = i + 1;
                     break;
                 }
@@ -236,5 +239,4 @@ public class FakeData {
     public List<Status> getFakeStatuses() {
         return allStatuses;
     }
-
 }
