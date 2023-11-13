@@ -41,10 +41,10 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
         User user = Cache.getInstance().getCurrUser();
         if (isFollowingButton) {
-            followService.requestUnfollow(authToken, user, new UnfollowRequestObserver());
+            followService.requestUnfollow(authToken, user, selectedUser, new UnfollowRequestObserver());
             view.displayMessage("Unfollowing " + selectedUser.getName());
         } else {
-            followService.requestFollow(authToken, user, new FollowRequestObserver());
+            followService.requestFollow(authToken, user, selectedUser, new FollowRequestObserver());
             view.displayMessage("Following " + selectedUser.getName());
         }
     }

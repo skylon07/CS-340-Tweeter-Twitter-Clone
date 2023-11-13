@@ -60,18 +60,18 @@ public class FollowService extends BaseService {
         executeTaskPair(followersCountTask, followingCountTask);
     }
 
-    public void doesUserFollow(AuthToken authToken, User userFollowing, User userFollowed, ResultObserver<Boolean> observer) {
-        IsFollowerTask isFollowerTask = new IsFollowerTask(authToken, userFollowing, userFollowed, new IsFollowerHandler(observer));
+    public void doesUserFollow(AuthToken authToken, User currUser, User userFollowed, ResultObserver<Boolean> observer) {
+        IsFollowerTask isFollowerTask = new IsFollowerTask(authToken, currUser, userFollowed, new IsFollowerHandler(observer));
         executeTask(isFollowerTask);
     }
 
-    public void requestFollow(AuthToken authToken, User user, SuccessObserver observer) {
-        FollowTask followTask = new FollowTask(authToken, user, new SuccessHandler(observer));
+    public void requestFollow(AuthToken authToken, User currUser, User userToFollow, SuccessObserver observer) {
+        FollowTask followTask = new FollowTask(authToken, currUser, userToFollow, new SuccessHandler(observer));
         executeTask(followTask);
     }
 
-    public void requestUnfollow(AuthToken authToken, User user, SuccessObserver observer) {
-        UnfollowTask unfollowTask = new UnfollowTask(authToken, user, new SuccessHandler(observer));
+    public void requestUnfollow(AuthToken authToken, User currUser, User userToUnfollow, SuccessObserver observer) {
+        UnfollowTask unfollowTask = new UnfollowTask(authToken, currUser, userToUnfollow, new SuccessHandler(observer));
         executeTask(unfollowTask);
     }
 }
