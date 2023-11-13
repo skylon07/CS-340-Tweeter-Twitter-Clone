@@ -13,8 +13,6 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
  * Background task that logs in a user (i.e., starts a session).
  */
 public class LoginTask extends AuthenticateTask {
-    private static String LOGIN_URL = "/login";
-
     public LoginTask(String username, String password, Handler messageHandler) {
         super(messageHandler, username, password);
     }
@@ -22,6 +20,6 @@ public class LoginTask extends AuthenticateTask {
     @Override
     protected LoginResponse callAuthenticationApi() throws IOException, TweeterRemoteException {
         LoginRequest request = new LoginRequest(username, password);
-        return getServerFacade().login(request, LOGIN_URL);
+        return getServerFacade().login(request);
     }
 }

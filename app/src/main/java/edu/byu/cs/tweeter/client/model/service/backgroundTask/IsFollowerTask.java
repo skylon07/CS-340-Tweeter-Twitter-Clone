@@ -3,22 +3,23 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 import android.os.Bundle;
 import android.os.Handler;
 
+import java.io.IOException;
 import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
+import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
 
 /**
  * Background task that determines if one user is following another.
  */
-public class IsFollowerTask extends AuthenticatedTask {
+public class IsFollowerTask extends UserActionTask {
 
     public static final String IS_FOLLOWER_KEY = "is-follower";
-
-    /**
-     * The alleged follower.
-     */
-    private final User follower;
 
     /**
      * The alleged followee.
@@ -27,20 +28,17 @@ public class IsFollowerTask extends AuthenticatedTask {
 
     private boolean isFollower;
 
-    public IsFollowerTask(AuthToken authToken, User follower, User followee, Handler messageHandler) {
-        super(authToken, messageHandler);
-        this.follower = follower;
+    public IsFollowerTask(AuthToken authToken, User currUser, User followee, Handler messageHandler) {
+        super(authToken, currUser, messageHandler);
         this.followee = followee;
     }
 
     @Override
-    protected void runTask() {
-        isFollower = new Random().nextInt() > 0;
-
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+    protected IsFollowingResponse callApi() throws IOException, TweeterRemoteException {
+        FollowsRequest request = new FollowsRequest(getAuthToken(), getCurrUser().getAlias(), followee.getAlias());
+        IsFollowingResponse response = getServerFacade().isFollowing(request);
+        isFollower = response.getIsFollowing();
+        return response;
     }
 
     @Override

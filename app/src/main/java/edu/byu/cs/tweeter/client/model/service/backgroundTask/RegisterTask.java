@@ -18,8 +18,6 @@ import kotlin.NotImplementedError;
  * Background task that creates a new user account and logs in the new user (i.e., starts a session).
  */
 public class RegisterTask extends AuthenticateTask {
-    private static String REGISTER_URL = "/register";
-
     /**
      * The user's first name.
      */
@@ -46,6 +44,6 @@ public class RegisterTask extends AuthenticateTask {
     @Override
     protected LoginResponse callAuthenticationApi() throws IOException, TweeterRemoteException {
         RegisterRequest request = new RegisterRequest(firstName, lastName, username, password, image);
-        return getServerFacade().register(request, REGISTER_URL);
+        return getServerFacade().register(request);
     }
 }

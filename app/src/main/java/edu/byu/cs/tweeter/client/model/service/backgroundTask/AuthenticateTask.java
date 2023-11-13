@@ -39,7 +39,7 @@ public abstract class AuthenticateTask extends NetworkTask {
 
 
     @Override
-    protected Response callApi() throws IOException, TweeterRemoteException {
+    protected LoginResponse callApi() throws IOException, TweeterRemoteException {
         LoginResponse loginResponse = callAuthenticationApi();
 
         authenticatedUser = loginResponse.getUser();

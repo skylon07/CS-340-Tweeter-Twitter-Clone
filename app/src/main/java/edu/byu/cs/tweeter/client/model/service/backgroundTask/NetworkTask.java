@@ -19,7 +19,7 @@ public abstract class NetworkTask extends BackgroundTask {
             if (response.isSuccess()) {
                 sendSuccessMessage();
             } else {
-                sendFailedMessage(response.getMessage());
+                sendFailedMessage(response.getErrorMessage());
             }
         } catch (Exception exception) {
             sendExceptionMessage(exception);

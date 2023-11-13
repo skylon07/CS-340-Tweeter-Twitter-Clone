@@ -2,34 +2,26 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
+import edu.byu.cs.tweeter.model.net.response.Response;
 
 /**
  * Background task that removes a following relationship between two users.
  */
-public class UnfollowTask extends AuthenticatedTask {
-
-    /**
-     * The user that is being followed.
-     */
-    private final User followee;
-
-    public UnfollowTask(AuthToken authToken, User followee, Handler messageHandler) {
-        super(authToken, messageHandler);
-        this.followee = followee;
+public class UnfollowTask extends FollowTask {
+    public UnfollowTask(AuthToken authToken, User currUser, User followee, Handler messageHandler) {
+        super(authToken, currUser, followee, messageHandler);
     }
 
     @Override
-    protected void runTask() {
-        // We could do this from the presenter, without a task and handler, but we will
-        // eventually access the database from here when we aren't using dummy data.
-
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+    protected Response callApi() throws IOException, TweeterRemoteException {
+        FollowsRequest request = new FollowsRequest(getAuthToken(), getCurrUser().getAlias(), getFollowee().getAlias());
+        return getServerFacade().unfollow(request);
     }
-
-
 }
