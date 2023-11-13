@@ -6,6 +6,8 @@ public class StatusRequest extends UserTargetedRequest {
     private String post;
     private Long timestamp;
 
+    public StatusRequest() { super(); }
+
     public StatusRequest(AuthToken authToken, String targetAlias, String post, Long timestamp) {
         super(authToken, targetAlias);
         this.post = post;

@@ -5,6 +5,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 public class FollowsRequest extends UserTargetedRequest {
     private String followeeAlias;
 
+    public FollowsRequest() { super(); }
+
     public FollowsRequest(AuthToken authToken, String followerAlias, String followeeAlias) {
         super(authToken, followerAlias);
         this.followeeAlias = followeeAlias;

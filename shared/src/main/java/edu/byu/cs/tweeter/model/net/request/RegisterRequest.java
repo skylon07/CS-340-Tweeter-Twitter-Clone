@@ -5,6 +5,8 @@ public class RegisterRequest extends LoginRequest {
     private String lastName;
     private String image;
 
+    public RegisterRequest() { super(); }
+
     public RegisterRequest(String firstName, String lastName, String username, String password, String image) {
         super(username, password);
          this.firstName = firstName;

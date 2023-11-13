@@ -10,6 +10,8 @@ public class PagedRequest extends UserTargetedRequest {
     private int limit;
     private String lastPageMark;
 
+    public PagedRequest() { super(); }
+
     public PagedRequest(AuthToken authToken, String targetAlias, int limit, String lastPageMark) {
         super(authToken, targetAlias);
         this.limit = limit;

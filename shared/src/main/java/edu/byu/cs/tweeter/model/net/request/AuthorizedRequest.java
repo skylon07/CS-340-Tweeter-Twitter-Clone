@@ -5,6 +5,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 public class AuthorizedRequest extends Request {
     private AuthToken authToken;
 
+    public AuthorizedRequest() { super(); }
+
     public AuthorizedRequest(AuthToken authToken) {
         this.authToken = authToken;
     }

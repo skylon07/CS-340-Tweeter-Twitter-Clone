@@ -4,9 +4,10 @@ package edu.byu.cs.tweeter.model.net.request;
  * Contains all the information needed to make a login request.
  */
 public class LoginRequest extends Request {
-
     private String username;
     private String password;
+
+    public LoginRequest() { super(); }
 
     /**
      * Creates an instance.
