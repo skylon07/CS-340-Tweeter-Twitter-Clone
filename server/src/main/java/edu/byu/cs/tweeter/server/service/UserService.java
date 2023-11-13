@@ -1,69 +1,55 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.AuthorizedRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyException;
+import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
-public class UserService {
-
+public class UserService extends BaseService {
     public LoginResponse login(LoginRequest request) {
-        if (request.getUsername() == null){
-            throw new RequestMissingPropertyException("username");
-        } else if(request.getPassword() == null) {
-            throw new RequestMissingPropertyException("password");
-        }
+        validateLoginRequest(request);
 
         // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
+        User user = getFakeData().getFirstUser();
+        AuthToken authToken = getFakeData().getAuthToken();
         return new LoginResponse(user, authToken);
+    }
+
+    public Response logout(AuthorizedRequest request) {
+        validateAuthorizedRequest(request);
+
+        // TODO: actually log out
+        return new Response();
     }
 
     public LoginResponse register(RegisterRequest request) {
-        if (request.getFirstName() == null) {
-            throw new RequestMissingPropertyException("firstName");
-        }
-        if (request.getLastName() == null) {
-            throw new RequestMissingPropertyException("lastName");
-        }
-        if (request.getUsername() == null) {
-            throw new RequestMissingPropertyException("username");
-        }
-        if (request.getPassword() == null) {
-            throw new RequestMissingPropertyException("password");
-        }
-        if (request.getImage() == null) {
-            throw new RequestMissingPropertyException("image");
-        }
+        validateRegisterRequest(request);
 
         // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
-        return new LoginResponse(user, authToken);
+        return new LoginResponse(getFakeData().getFirstUser(), getFakeData().getAuthToken());
     }
 
-    /**
-     * Returns the dummy user to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy user.
-     *
-     * @return a dummy user.
-     */
-    User getDummyUser() {
-        return getFakeData().getFirstUser();
-    }
+    public UserResponse getUser(UserTargetedRequest request) {
+        validateUserTargetedRequest(request);
 
-    /**
-     * Returns the dummy auth token to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy auth token.
-     *
-     * @return a dummy auth token.
-     */
-    AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
+        // TODO: Generates dummy data. Replace with a real implementation.
+        List<User> users = getFakeData().getFakeUsers();
+        int userIdx =
+            users
+                .stream()
+                .map(User::getAlias)
+                .collect(Collectors.toList())
+                .indexOf(request.getTargetAlias());
+        return new UserResponse(users.get(userIdx));
     }
 
     /**

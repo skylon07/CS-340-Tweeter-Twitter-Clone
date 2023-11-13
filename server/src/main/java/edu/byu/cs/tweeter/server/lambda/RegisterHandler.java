@@ -8,14 +8,10 @@ import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.server.service.UserService;
 
-/**
- * An AWS lambda function that logs a user in and returns the user object and an auth code for
- * a successful login.
- */
 public class RegisterHandler implements RequestHandler<RegisterRequest, LoginResponse> {
     @Override
-    public LoginResponse handleRequest(RegisterRequest registerRequest, Context context) {
-        UserService userService = new UserService();
-        return userService.register(registerRequest);
+    public LoginResponse handleRequest(RegisterRequest request, Context context) {
+        UserService service = new UserService();
+        return service.register(request);
     }
 }

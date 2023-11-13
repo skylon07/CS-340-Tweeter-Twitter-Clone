@@ -16,7 +16,7 @@ import edu.byu.cs.tweeter.util.Pair;
 
 public class FollowServiceTest {
 
-    private PagedRequest request;
+    private PagedRequest<User> request;
     private UsersResponse expectedResponse;
     private FollowDAO mockFollowDAO;
     private FollowService followServiceSpy;
@@ -35,12 +35,12 @@ public class FollowServiceTest {
                 "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/daisy_duck.png");
 
         // Setup a request object to use in the tests
-        request = new PagedRequest(authToken, currentUser.getAlias(), 3, null);
+        request = new PagedRequest<User>(authToken, currentUser.getAlias(), 3, null);
 
         // Setup a mock FollowDAO that will return known responses
         expectedResponse = new UsersResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
         mockFollowDAO = Mockito.mock(FollowDAO.class);
-        Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastPageMark()))
+        Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), ((User) request.getLastItem()).getAlias()))
                 .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
         followServiceSpy = Mockito.spy(FollowService.class);
@@ -53,7 +53,7 @@ public class FollowServiceTest {
      */
     @Test
     public void testGetFollowees_validRequest_correctResponse() {
-        UsersResponse response = followServiceSpy.getFollowees(request);
+        UsersResponse response = followServiceSpy.getFollowing(request);
         Assertions.assertEquals(expectedResponse, response);
     }
 }

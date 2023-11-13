@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.AuthorizedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
@@ -31,7 +33,7 @@ public class ServerFacade {
     private final ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
 
     public LoginResponse register(RegisterRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users";
+        String urlPath = "/register"; // ideally would be "/users";
         return clientCommunicator.doPost(urlPath, request, null, LoginResponse.class);
     }
 
@@ -42,68 +44,68 @@ public class ServerFacade {
      * @return the login response.
      */
     public LoginResponse login(LoginRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/sessions";
+        String urlPath = "/login"; // ideally would be "/sessions";
         return clientCommunicator.doPost(urlPath, request, null, LoginResponse.class);
     }
 
     public Response logout(AuthorizedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/sessions/" + request.getAuthToken().getToken();
-        return clientCommunicator.doDelete(urlPath, request, createHeaders(request.getAuthToken()), Response.class);
+        String urlPath = "/logout"; // ideally would be "/sessions/" + request.getAuthToken().getToken();
+        return clientCommunicator.doPost(urlPath, request, null, Response.class); // SHOULD BE DELETE!!!
     }
 
     public UserResponse getUser(UserTargetedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias());
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), UserResponse.class);
+        String urlPath = "/getuser"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias());
+        return clientCommunicator.doPost(urlPath, request, null, UserResponse.class); // SHOULD BE GET!!!
     }
 
-    public UsersResponse getFollowers(PagedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/followers/users";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), UsersResponse.class);
+    public UsersResponse getFollowers(PagedRequest<User> request) throws IOException, TweeterRemoteException {
+        String urlPath = "/getfollowers"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/followers/users";
+        return clientCommunicator.doPost(urlPath, request, null, UsersResponse.class); // SHOULD BE GET!!!
     }
 
     public CountResponse countFollowers(UserTargetedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/followers/count";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), CountResponse.class);
+        String urlPath = "/countfollowers"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/followers/count";
+        return clientCommunicator.doPost(urlPath, request, null, CountResponse.class); // SHOULD BE GET!!!
     }
 
-    public UsersResponse getFollowing(PagedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/following/users";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), UsersResponse.class);
+    public UsersResponse getFollowing(PagedRequest<User> request) throws IOException, TweeterRemoteException {
+        String urlPath = "/getfollowing"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/following/users";
+        return clientCommunicator.doPost(urlPath, request, null, UsersResponse.class); // SHOULD BE GET!!!
     }
 
     public CountResponse countFollowing(UserTargetedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/following/count";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), CountResponse.class);
+        String urlPath = "/countfollowing"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/following/count";
+        return clientCommunicator.doPost(urlPath, request, null, CountResponse.class); // SHOULD BE GET!!!
     }
 
     public IsFollowingResponse isFollowing(FollowsRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), IsFollowingResponse.class);
+        String urlPath = "/isfollowing"; // ideally would be "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
+        return clientCommunicator.doPost(urlPath, request, null, IsFollowingResponse.class); // SHOULD BE GET!!!
     }
 
     public Response follow(FollowsRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
-        return clientCommunicator.doPost(urlPath, request, createHeaders(request.getAuthToken()), Response.class);
+        String urlPath = "/follow"; // ideally would be "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
+        return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 
     public Response unfollow(FollowsRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
-        return clientCommunicator.doDelete(urlPath, request, createHeaders(request.getAuthToken()), Response.class);
+        String urlPath = "/unfollow"; // ideally would be "/users/" + sanitizeAlias(request.getFollowerAlias()) + "/following/users/" + sanitizeAlias(request.getFolloweeAlias());
+        return clientCommunicator.doPost(urlPath, request, null, Response.class); // SHOULD BE DELETE!!!
     }
 
     public Response postStatus(StatusRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/statuses";
-        return clientCommunicator.doPost(urlPath, request, createHeaders(request.getAuthToken()), Response.class);
+        String urlPath = "/poststatus"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/statuses";
+        return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 
-    public StatusesResponse getStory(PagedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/statuses";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), StatusesResponse.class);
+    public StatusesResponse getStory(PagedRequest<Status> request) throws IOException, TweeterRemoteException {
+        String urlPath = "/getstory"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/statuses";
+        return clientCommunicator.doPost(urlPath, request, null, StatusesResponse.class); // SHOULD BE GET!!!
     }
 
-    public StatusesResponse getFeed(PagedRequest request) throws IOException, TweeterRemoteException {
-        String urlPath = "/users/" + sanitizeAlias(request.getTargetAlias()) + "/feed";
-        return clientCommunicator.doGet(urlPath, createHeaders(request.getAuthToken()), StatusesResponse.class);
+    public StatusesResponse getFeed(PagedRequest<Status> request) throws IOException, TweeterRemoteException {
+        String urlPath = "/getfeed"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/feed";
+        return clientCommunicator.doPost(urlPath, request, null, StatusesResponse.class); // SHOULD BE GET!!!
     }
 
     private Map<String, String> createHeaders(AuthToken authToken) {

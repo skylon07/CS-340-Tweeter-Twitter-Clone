@@ -60,15 +60,21 @@ class ClientCommunicator {
             }
 
             @Override
-            public void sendRequest(HttpURLConnection connection) {
-                // Nothing to send.
+            public void sendRequest(HttpURLConnection connection) throws IOException {
+                connection.setDoOutput(true);
+
+                String entityBody = JsonSerializer.serialize(requestInfo);
+                try (DataOutputStream os = new DataOutputStream(connection.getOutputStream())) {
+                    os.writeBytes(entityBody);
+                    os.flush();
+                }
             }
         };
 
         return doRequest(urlPath, headers, returnType, requestStrategy);
     }
 
-    <T> T doGet(String urlPath, Map<String, String> headers, Class<T> returnType)
+    <T> T doGet(String urlPath, final Object requestInfo, Map<String, String> headers, Class<T> returnType)
             throws IOException, TweeterRemoteException {
         RequestStrategy requestStrategy = new RequestStrategy() {
             @Override
@@ -77,8 +83,14 @@ class ClientCommunicator {
             }
 
             @Override
-            public void sendRequest(HttpURLConnection connection) {
-                // Nothing to send. For a get, the request is sent when the connection is opened.
+            public void sendRequest(HttpURLConnection connection) throws IOException {
+                connection.setDoOutput(true);
+
+                String entityBody = JsonSerializer.serialize(requestInfo);
+                try (DataOutputStream os = new DataOutputStream(connection.getOutputStream())) {
+                    os.writeBytes(entityBody);
+                    os.flush();
+                }
             }
         };
 

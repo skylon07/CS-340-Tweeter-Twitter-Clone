@@ -43,6 +43,8 @@ public class Status implements Serializable {
         this.mentions = mentions;
     }
 
+    public String asPageMark() { return post + "::" + user.getAlias() + "::" + timestamp; }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -66,8 +68,6 @@ public class Status implements Serializable {
     public List<String> getMentions() {
         return mentions;
     }
-
-    public String asId() { return user.getAlias() + "::" + timestamp; }
 
     @Override
     public boolean equals(Object o) {

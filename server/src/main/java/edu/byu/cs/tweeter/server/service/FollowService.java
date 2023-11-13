@@ -1,19 +1,41 @@
 package edu.byu.cs.tweeter.server.service;
 
 import java.util.List;
+import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
+import edu.byu.cs.tweeter.model.net.response.CountResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
-import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
-import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyException;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
-public class FollowService {
+public class FollowService extends BaseService {
+    public UsersResponse getFollowers(PagedRequest<User> request) {
+        validatePagedRequest(request);
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        String lastAlias = null;
+        if (request.getLastItem() != null) {
+            lastAlias = request.getLastItem().getAlias();
+        }
+        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getTargetAlias(), request.getLimit(), lastAlias);
+        return new UsersResponse(pair.getFirst(), pair.getSecond());
+    }
+
+    public CountResponse countFollowers(UserTargetedRequest request) {
+        validateUserTargetedRequest(request);
+
+        // TODO: fake data; replace with real count
+        return new CountResponse(72);
+    }
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in
@@ -24,15 +46,44 @@ public class FollowService {
      * @param request contains the data required to fulfill the request.
      * @return the followees.
      */
-    public UsersResponse getFollowees(PagedRequest request) {
-        if (request.getRequestOwnerAlias() == null) {
-            throw new RequestMissingPropertyException("requestOwnerAlias");
-        } else if (request.getLimit() <= 0) {
-            throw new BadRequestException("Request property \"limit\" must be a positive integer or zero");
-        }
+    public UsersResponse getFollowing(PagedRequest<User> request) {
+        validatePagedRequest(request);
 
-        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getRequestOwnerAlias(), request.getLimit(), request.getLastPageMark());
+        // TODO: Generates dummy data. Replace with a real implementation.
+        String lastAlias = null;
+        if (request.getLastItem() != null) {
+            lastAlias = request.getLastItem().getAlias();
+        }
+        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getTargetAlias(), request.getLimit(), lastAlias);
         return new UsersResponse(pair.getFirst(), pair.getSecond());
+    }
+
+    public CountResponse countFollowing(UserTargetedRequest request) {
+        validateUserTargetedRequest(request);
+
+        // TODO: fake data; replace with real count
+        return new CountResponse(27);
+    }
+
+    public IsFollowingResponse isFollowing(FollowsRequest request) {
+        validateFollowsRequest(request);
+
+        // TODO: fake data; replace with real info
+        return new IsFollowingResponse(new Random().nextInt() > 0);
+    }
+
+    public Response follow(FollowsRequest request) {
+        validateFollowsRequest(request);
+
+        // TODO: should actually change data in the DB here
+        return new Response();
+    }
+
+    public Response unfollow(FollowsRequest request) {
+        validateFollowsRequest(request);
+
+        // TODO: should actually change data in the DB here
+        return new Response();
     }
 
     /**

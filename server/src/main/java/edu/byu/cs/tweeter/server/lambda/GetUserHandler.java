@@ -4,13 +4,15 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
+import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.service.UserService;
 
-public class LoginHandler implements RequestHandler<LoginRequest, LoginResponse> {
+public class GetUserHandler implements RequestHandler<UserTargetedRequest, UserResponse> {
     @Override
-    public LoginResponse handleRequest(LoginRequest request, Context context) {
+    public UserResponse handleRequest(UserTargetedRequest request, Context context) {
         UserService service = new UserService();
-        return service.login(request);
+        return service.getUser(request);
     }
 }
