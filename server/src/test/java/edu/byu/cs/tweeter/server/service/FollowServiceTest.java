@@ -9,15 +9,15 @@ import java.util.Arrays;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.response.UsersResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class FollowServiceTest {
 
-    private FollowingRequest request;
-    private FollowingResponse expectedResponse;
+    private PagedRequest request;
+    private UsersResponse expectedResponse;
     private FollowDAO mockFollowDAO;
     private FollowService followServiceSpy;
 
@@ -35,25 +35,25 @@ public class FollowServiceTest {
                 "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/daisy_duck.png");
 
         // Setup a request object to use in the tests
-        request = new FollowingRequest(authToken, currentUser.getAlias(), 3, null);
+        request = new PagedRequest(authToken, currentUser.getAlias(), 3, null);
 
         // Setup a mock FollowDAO that will return known responses
-        expectedResponse = new FollowingResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
+        expectedResponse = new UsersResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
         mockFollowDAO = Mockito.mock(FollowDAO.class);
-        Mockito.when(mockFollowDAO.getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias()))
-                .thenReturn(new Pair<>(expectedResponse.getFollowees(), expectedResponse.getHasMorePages()));
+        Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastPageMark()))
+                .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
         followServiceSpy = Mockito.spy(FollowService.class);
         Mockito.when(followServiceSpy.getFollowingDAO()).thenReturn(mockFollowDAO);
     }
 
     /**
-     * Verify that the {@link FollowService#getFollowees(FollowingRequest)}
+     * Verify that the {@link FollowService#getFollowees(PagedRequest)}
      * method returns the same result as the {@link FollowDAO} class.
      */
     @Test
     public void testGetFollowees_validRequest_correctResponse() {
-        FollowingResponse response = followServiceSpy.getFollowees(request);
+        UsersResponse response = followServiceSpy.getFollowees(request);
         Assertions.assertEquals(expectedResponse, response);
     }
 }

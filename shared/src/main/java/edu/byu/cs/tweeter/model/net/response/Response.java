@@ -8,26 +8,16 @@ import java.io.Serializable;
 public class Response implements Serializable {
 
     private final boolean success;
-    private final String message;
+    private final String errorMessage;
 
-    /**
-     * Creates an instance with a null message.
-     *
-     * @param success the success message.
-     */
-    Response(boolean success) {
-        this(success, null);
+    Response() {
+        this.success = true;
+        this.errorMessage = null;
     }
 
-    /**
-     * Creates an instance.
-     *
-     * @param success the success indicator.
-     * @param message the error message.
-     */
-    Response(boolean success, String message) {
-        this.success = success;
-        this.message = message;
+    Response(String errorMessage) {
+        this.success = false;
+        this.errorMessage = errorMessage;
     }
 
     /**
@@ -44,7 +34,7 @@ public class Response implements Serializable {
      *
      * @return an error message or null if the response indicates a successful result.
      */
-    public String getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

@@ -9,11 +9,11 @@ public class AuthToken implements Serializable {
     /**
      * Value of the auth token.
      */
-    public String token;
+    private String token;
     /**
      * String representation of date/time at which the auth token was created.
      */
-    public long timestamp;
+    private long timestamp;
 
     public AuthToken() {
     }

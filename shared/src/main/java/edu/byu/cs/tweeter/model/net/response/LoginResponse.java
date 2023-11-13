@@ -9,16 +9,18 @@ import edu.byu.cs.tweeter.model.net.request.LoginRequest;
  */
 public class LoginResponse extends Response {
 
-    private User user;
-    private AuthToken authToken;
+    private final User user;
+    private final AuthToken authToken;
 
     /**
      * Creates a response indicating that the corresponding request was unsuccessful.
      *
-     * @param message a message describing why the request was unsuccessful.
+     * @param errorMessage a message describing why the request was unsuccessful.
      */
-    public LoginResponse(String message) {
-        super(false, message);
+    public LoginResponse(String errorMessage) {
+        super(errorMessage);
+        user = null;
+        authToken = null;
     }
 
     /**
@@ -28,7 +30,6 @@ public class LoginResponse extends Response {
      * @param authToken the auth token representing this user's session with the server.
      */
     public LoginResponse(User user, AuthToken authToken) {
-        super(true, null);
         this.user = user;
         this.authToken = authToken;
     }

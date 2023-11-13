@@ -30,8 +30,8 @@ public class UserService {
         if (request.getLastName() == null) {
             throw new RequestMissingPropertyException("lastName");
         }
-        if (request.getUserAlias() == null) {
-            throw new RequestMissingPropertyException("userAlias");
+        if (request.getUsername() == null) {
+            throw new RequestMissingPropertyException("username");
         }
         if (request.getPassword() == null) {
             throw new RequestMissingPropertyException("password");

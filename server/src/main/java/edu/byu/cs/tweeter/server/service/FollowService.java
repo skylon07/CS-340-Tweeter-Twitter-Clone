@@ -3,9 +3,11 @@ package edu.byu.cs.tweeter.server.service;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.response.UsersResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
+import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyException;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
@@ -22,15 +24,15 @@ public class FollowService {
      * @param request contains the data required to fulfill the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(FollowingRequest request) {
-        if(request.getFollowerAlias() == null) {
-            throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
-        } else if(request.getLimit() <= 0) {
-            throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
+    public UsersResponse getFollowees(PagedRequest request) {
+        if (request.getRequestOwnerAlias() == null) {
+            throw new RequestMissingPropertyException("requestOwnerAlias");
+        } else if (request.getLimit() <= 0) {
+            throw new BadRequestException("Request property \"limit\" must be a positive integer or zero");
         }
 
-        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
-        return new FollowingResponse(pair.getFirst(), pair.getSecond());
+        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getRequestOwnerAlias(), request.getLimit(), request.getLastPageMark());
+        return new UsersResponse(pair.getFirst(), pair.getSecond());
     }
 
     /**
