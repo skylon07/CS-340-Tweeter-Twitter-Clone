@@ -51,6 +51,23 @@ class ClientCommunicator {
         return doRequest(urlPath, headers, returnType, requestStrategy);
     }
 
+    <T> T doDelete(String urlPath, final Object requestInfo, Map<String, String> headers, Class<T> returnType)
+            throws IOException, TweeterRemoteException {
+        RequestStrategy requestStrategy = new RequestStrategy() {
+            @Override
+            public void setRequestMethod(HttpURLConnection connection) throws IOException {
+                connection.setRequestMethod("DELETE");
+            }
+
+            @Override
+            public void sendRequest(HttpURLConnection connection) {
+                // Nothing to send.
+            }
+        };
+
+        return doRequest(urlPath, headers, returnType, requestStrategy);
+    }
+
     <T> T doGet(String urlPath, Map<String, String> headers, Class<T> returnType)
             throws IOException, TweeterRemoteException {
         RequestStrategy requestStrategy = new RequestStrategy() {
