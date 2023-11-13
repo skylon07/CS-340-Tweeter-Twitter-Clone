@@ -20,7 +20,7 @@ public class GetFollowersTask extends PagedUserTask {
 
     @Override
     protected PagedResponse<User> callApiForPage() throws IOException, TweeterRemoteException {
-        PagedRequest request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem().getAlias());
+        PagedRequest<User> request = new PagedRequest<>(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem());
         return getServerFacade().getFollowers(request);
     }
 }

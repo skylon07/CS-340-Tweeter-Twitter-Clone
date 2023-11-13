@@ -6,16 +6,16 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
  * Contains all the information needed to make a request to have the server return the next page of
  * followees for a specified follower.
  */
-public class PagedRequest extends UserTargetedRequest {
+public class PagedRequest<ItemT> extends UserTargetedRequest {
     private int limit;
-    private String lastPageMark;
+    private ItemT lastItem;
 
     public PagedRequest() { super(); }
 
-    public PagedRequest(AuthToken authToken, String targetAlias, int limit, String lastPageMark) {
+    public PagedRequest(AuthToken authToken, String targetAlias, int limit, ItemT lastItem) {
         super(authToken, targetAlias);
         this.limit = limit;
-        this.lastPageMark = lastPageMark;
+        this.lastItem = lastItem;
     }
 
     /**
@@ -36,11 +36,11 @@ public class PagedRequest extends UserTargetedRequest {
         this.limit = limit;
     }
 
-    public String getLastPageMark() {
-        return lastPageMark;
+    public ItemT getLastItem() {
+        return lastItem;
     }
 
-    public void setLastPageMark(String lastPageMark) {
-        this.lastPageMark = lastPageMark;
+    public void setLastItem(ItemT lastItem) {
+        this.lastItem = lastItem;
     }
 }

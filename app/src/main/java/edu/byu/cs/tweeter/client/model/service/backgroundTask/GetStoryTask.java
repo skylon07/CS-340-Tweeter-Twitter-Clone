@@ -24,7 +24,7 @@ public class GetStoryTask extends PagedStatusTask {
 
     @Override
     protected PagedResponse<Status> callApiForPage() throws IOException, TweeterRemoteException {
-        PagedRequest request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem().asId());
+        PagedRequest<Status> request = new PagedRequest<>(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem());
         return getServerFacade().getStory(request);
     }
 }
