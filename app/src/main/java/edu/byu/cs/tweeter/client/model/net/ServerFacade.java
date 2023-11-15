@@ -28,9 +28,17 @@ import edu.byu.cs.tweeter.model.net.response.Response;
  */
 public class ServerFacade {
 
-    private static final String SERVER_URL = "https://vj2ldrkjii.execute-api.us-west-1.amazonaws.com/production";
+    public static final String SERVER_URL = "https://vj2ldrkjii.execute-api.us-west-1.amazonaws.com/production";
 
-    private final ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
+    private final ClientCommunicator clientCommunicator;
+
+    public ServerFacade() {
+        clientCommunicator = new ClientCommunicator(SERVER_URL);
+    }
+
+    public ServerFacade(ClientCommunicator clientCommunicator) {
+        this.clientCommunicator = clientCommunicator;
+    }
 
     public LoginResponse register(RegisterRequest request) throws IOException, TweeterRemoteException {
         String urlPath = "/register"; // ideally would be "/users";

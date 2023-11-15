@@ -7,12 +7,12 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
  * followees for a specified follower.
  */
 public class PagedRequest<ItemT> extends UserTargetedRequest {
-    private int limit;
+    private Integer limit;
     private ItemT lastItem;
 
     public PagedRequest() { super(); }
 
-    public PagedRequest(AuthToken authToken, String targetAlias, int limit, ItemT lastItem) {
+    public PagedRequest(AuthToken authToken, String targetAlias, Integer limit, ItemT lastItem) {
         super(authToken, targetAlias);
         this.limit = limit;
         this.lastItem = lastItem;
@@ -23,7 +23,7 @@ public class PagedRequest<ItemT> extends UserTargetedRequest {
      *
      * @return the limit.
      */
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
@@ -32,7 +32,7 @@ public class PagedRequest<ItemT> extends UserTargetedRequest {
      *
      * @param limit the limit.
      */
-    public void setLimit(int limit) {
+    public void setLimit(Integer limit) {
         this.limit = limit;
     }
 
