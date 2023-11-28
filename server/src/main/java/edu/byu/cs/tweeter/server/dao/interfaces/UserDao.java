@@ -7,5 +7,5 @@ public interface UserDao {
     User getUser(String username);
     User getUserForLogin(String username);
     boolean isValidPassword(String username, String password);
-    void saveUserHash(String username, String userHash);
+    void savePassword(String username, String password);
 }

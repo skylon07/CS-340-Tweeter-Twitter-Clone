@@ -15,7 +15,7 @@ import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyExcept
 import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException;
 
 public class BaseService {
-    private static final long AUTH_TOKEN_AGE_LIMIT = 1000 * 60 * 60 * 24 * 3;
+    private static final long AUTH_TOKEN_AGE_LIMIT = 1000 * 60 * 10; // ten minutes for testing purposes
 
     protected final SessionDao sessionDao;
 
@@ -78,8 +78,9 @@ public class BaseService {
 
     private void validateAuth(AuthToken authToken) {
         authToken = sessionDao.updateTimestamp(authToken);
+        String associatedUser = sessionDao.getAssociatedUsername(authToken);
         long currentTime = System.currentTimeMillis();
-        if (isExpiredAuthToken(authToken, currentTime)) {
+        if (associatedUser == null || isExpiredAuthToken(authToken, currentTime)) {
             cleanExpiredSessions(); // TODO: should be done as a background job or something...
             throw new UnauthorizedRequestException();
         }

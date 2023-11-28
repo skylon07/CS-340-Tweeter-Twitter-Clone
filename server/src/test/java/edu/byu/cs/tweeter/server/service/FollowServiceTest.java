@@ -43,7 +43,7 @@ public class FollowServiceTest {
         expectedResponse = new UsersResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
         mockSessionDAO = Mockito.mock(SessionDao.class);
         mockFollowDAO = Mockito.mock(FollowDao.class);
-        Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), ((User) request.getLastItem()).getAlias()))
+        Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem()))
                 .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
         followServiceSpy = Mockito.spy(new FollowService(mockSessionDAO, mockFollowDAO));

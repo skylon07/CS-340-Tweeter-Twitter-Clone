@@ -17,8 +17,8 @@ public class FakeDataSessionDao extends FakeDataDao implements SessionDao {
     }
 
     @Override
-    public boolean revokeSession(AuthToken token) {
-        return true; // intentionally left blank (nothing to "revoke")
+    public void revokeSession(AuthToken token) {
+        return; // intentionally left blank (nothing to "revoke")
     }
 
     @Override

@@ -35,7 +35,7 @@ public class FakeDataUserDao extends FakeDataDao implements UserDao {
     }
 
     @Override
-    public void saveUserHash(String username, String userHash) {
+    public void savePassword(String username, String userHash) {
         return; // intentionally blank
     }
 }

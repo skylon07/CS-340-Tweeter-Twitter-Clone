@@ -13,12 +13,11 @@ import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 public class UserService extends BaseService {
+    private static final String TOKEN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+
     private final UserDao userDao;
 
     public UserService(SessionDao sessionDao, UserDao userDao) {
@@ -50,11 +49,9 @@ public class UserService extends BaseService {
 
         User newUser = userDao.createUser(request.getFirstName(), request.getLastName(), request.getUsername(), request.getImage());
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String userHash = encoder.encode(request.getPassword());
-        userDao.saveUserHash(request.getUsername(), userHash);
-
+        userDao.savePassword(request.getUsername(), request.getPassword());
         AuthToken newToken = generateNewAuthTokenFor(request.getUsername());
+
         return new LoginResponse(newUser, newToken);
     }
 
@@ -65,9 +62,12 @@ public class UserService extends BaseService {
     }
 
     private AuthToken generateNewAuthTokenFor(String username) {
-        byte[] newTokenBytes = new byte[32];
-        new Random().nextBytes(newTokenBytes);
-        String newTokenString = new String(newTokenBytes, StandardCharsets.UTF_8);
+        String newTokenString = "";
+        Random rng = new Random();
+        for (int charIdx = 0; charIdx < 16; ++charIdx) {
+            char currChar = TOKEN_CHARS.charAt(rng.nextInt(TOKEN_CHARS.length()));
+            newTokenString += currChar;
+        }
         AuthToken newToken = new AuthToken(newTokenString, System.currentTimeMillis());
 
         assert username != null : "Cannot create auth token without a username";

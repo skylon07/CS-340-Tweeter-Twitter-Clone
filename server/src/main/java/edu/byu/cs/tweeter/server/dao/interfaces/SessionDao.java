@@ -7,7 +7,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 public interface SessionDao {
     void createSession(String username, AuthToken token);
     String getAssociatedUsername(AuthToken token);
-    boolean revokeSession(AuthToken token);
+    void revokeSession(AuthToken token);
     AuthToken updateTimestamp(AuthToken token);
     void saveUpdatedTimestamp(AuthToken token);
     Stream<AuthToken> getAuthTokens();
