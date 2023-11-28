@@ -1,17 +1,15 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.implementations.fakedata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.util.FakeData;
 import edu.byu.cs.tweeter.util.Pair;
 
-/**
- * A DAO for accessing 'following' data from the database.
- */
-public class FollowDAO {
-
+public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
     /**
      * Gets the count of users from the database that the user specified is following. The
      * current implementation uses generated data and doesn't actually access a database.
@@ -19,9 +17,10 @@ public class FollowDAO {
      * @param follower the User whose count of how many following is desired.
      * @return said count.
      */
-    public Integer getFolloweeCount(User follower) {
+    @Override
+    public Integer getFolloweeCount(String followerAlias) {
         // TODO: uses the dummy data.  Replace with a real implementation.
-        assert follower != null;
+        assert followerAlias != null;
         return getDummyFollowees().size();
     }
 
@@ -37,7 +36,8 @@ public class FollowDAO {
      *                          null if there was no previous request.
      * @return the followees.
      */
-    public Pair<List<User>, Boolean> getFollowees(String followerAlias, int limit, String lastFolloweeAlias) {
+    @Override
+    public Pair<List<User>, Boolean> getFollowees(String followerAlias, int limit, User lastFollowee) {
         // TODO: Generates dummy data. Replace with a real implementation.
         assert limit > 0;
         assert followerAlias != null;
@@ -49,7 +49,8 @@ public class FollowDAO {
 
         if(limit > 0) {
             if (allFollowees != null) {
-                int followeesIndex = getFolloweesStartingIndex(lastFolloweeAlias, allFollowees);
+                int followeesIndex = lastFollowee != null ?
+                    getFolloweesStartingIndex(lastFollowee.getAlias(), allFollowees) : 0;
 
                 for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < limit; followeesIndex++, limitCounter++) {
                     responseFollowees.add(allFollowees.get(followeesIndex));
@@ -60,6 +61,31 @@ public class FollowDAO {
         }
 
         return new Pair<>(responseFollowees, hasMorePages);
+    }
+
+    @Override
+    public Pair<List<User>, Boolean> getFollowers(String followeeAlias, int limit, User lastFollower) {
+        return getFollowees(followeeAlias, limit, lastFollower);
+    }
+
+    @Override
+    public Integer getFollowerCount(String followeeAlias) {
+        return getFolloweeCount(followeeAlias);
+    }
+
+    @Override
+    public boolean isFollowing(String followerAlias, String followeeAlias) {
+        return new Random().nextInt() > 0;
+    }
+
+    @Override
+    public void recordFollow(String followerAlias, String followeeAlias) {
+        return; // intentionally left blank (nothing to record)
+    }
+
+    @Override
+    public void removeFollow(String followerAlias, String followeeAlias) {
+        return; // intentionally left blank (nothing to remove)
     }
 
     /**

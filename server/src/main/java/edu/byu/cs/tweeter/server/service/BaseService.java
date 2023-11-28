@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.net.request.AuthorizedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -8,11 +9,20 @@ import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.Request;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
+import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyException;
 import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException;
 
 public class BaseService {
+    private static final long AUTH_TOKEN_AGE_LIMIT = 1000 * 60 * 60 * 24 * 3;
+
+    protected final SessionDao sessionDao;
+
+    BaseService(SessionDao sessionDao) {
+        this.sessionDao = sessionDao;
+    }
+
     protected void validateRequest(Request request) {
         if (request == null) throw new BadRequestException("Request is null!");
     }
@@ -34,6 +44,7 @@ public class BaseService {
 
     protected void validateAuthorizedRequest(AuthorizedRequest request) {
         validateRequest(request);
+        validateAuth(request.getAuthToken());
 
         if (request.getAuthToken() == null) throw new UnauthorizedRequestException();
     }
@@ -63,5 +74,35 @@ public class BaseService {
 
         if (request.getPost() == null) throw new RequestMissingPropertyException("post");
         if (request.getTimestamp() == null) throw new RequestMissingPropertyException("timestamp");
+    }
+
+    private void validateAuth(AuthToken authToken) {
+        authToken = sessionDao.updateTimestamp(authToken);
+        long currentTime = System.currentTimeMillis();
+        if (isExpiredAuthToken(authToken, currentTime)) {
+            cleanExpiredSessions(); // TODO: should be done as a background job or something...
+            throw new UnauthorizedRequestException();
+        }
+
+        resetExpiration(authToken);
+    }
+
+    private void cleanExpiredSessions() {
+        long currentTime = System.currentTimeMillis();
+        sessionDao.getAuthTokens().forEach((authToken -> {
+            if (isExpiredAuthToken(authToken, currentTime)) {
+                sessionDao.revokeSession(authToken);
+            }
+        }));
+    }
+
+    private boolean isExpiredAuthToken(AuthToken authToken, long currentTime) {
+        long timeSinceCreation = currentTime - authToken.getTimestamp();
+        return timeSinceCreation > AUTH_TOKEN_AGE_LIMIT;
+    }
+
+    private void resetExpiration(AuthToken authToken) {
+        authToken.setTimestamp(System.currentTimeMillis());
+        sessionDao.saveUpdatedTimestamp(authToken);
     }
 }

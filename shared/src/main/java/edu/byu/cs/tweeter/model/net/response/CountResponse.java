@@ -8,7 +8,7 @@ public class CountResponse extends Response {
         count = null;
     }
 
-    public CountResponse(int count) {
+    public CountResponse(Integer count) {
         this.count = count;
     }
 

@@ -11,14 +11,16 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
-import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class FollowServiceTest {
 
     private PagedRequest<User> request;
     private UsersResponse expectedResponse;
-    private FollowDAO mockFollowDAO;
+    private SessionDao mockSessionDAO;
+    private FollowDao mockFollowDAO;
     private FollowService followServiceSpy;
 
     @BeforeEach
@@ -39,12 +41,12 @@ public class FollowServiceTest {
 
         // Setup a mock FollowDAO that will return known responses
         expectedResponse = new UsersResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
-        mockFollowDAO = Mockito.mock(FollowDAO.class);
+        mockSessionDAO = Mockito.mock(SessionDao.class);
+        mockFollowDAO = Mockito.mock(FollowDao.class);
         Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), ((User) request.getLastItem()).getAlias()))
                 .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
-        followServiceSpy = Mockito.spy(FollowService.class);
-        Mockito.when(followServiceSpy.getFollowingDAO()).thenReturn(mockFollowDAO);
+        followServiceSpy = Mockito.spy(new FollowService(mockSessionDAO, mockFollowDAO));
     }
 
     /**
