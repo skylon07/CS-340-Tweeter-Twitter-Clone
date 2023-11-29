@@ -11,8 +11,10 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
+import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.StatusDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import edu.byu.cs.tweeter.util.Pair;
 
@@ -49,7 +51,28 @@ public class FollowServiceTest {
         Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem()))
                 .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
-        followServiceSpy = Mockito.spy(new FollowService(mockSessionDAO, mockFollowDAO, mockUserDAO));
+        // TODO: make a real factory for this
+        followServiceSpy = Mockito.spy(new FollowService(new DaoFactory() {
+            @Override
+            public FollowDao getFollowDao() {
+                return mockFollowDAO;
+            }
+
+            @Override
+            public SessionDao getSessionDao() {
+                return mockSessionDAO;
+            }
+
+            @Override
+            public StatusDao getStatusDao() {
+                return null;
+            }
+
+            @Override
+            public UserDao getUserDao() {
+                return mockUserDAO;
+            }
+        }));
     }
 
     /**

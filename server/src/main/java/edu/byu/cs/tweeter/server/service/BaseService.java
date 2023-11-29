@@ -9,7 +9,7 @@ import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.Request;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
-import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 import edu.byu.cs.tweeter.server.service.exceptions.RequestMissingPropertyException;
 import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException;
@@ -17,10 +17,14 @@ import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException
 public class BaseService {
     private static final long AUTH_TOKEN_AGE_LIMIT = 1000 * 60 * 10; // ten minutes for testing purposes
 
-    protected final SessionDao sessionDao;
+    protected final DaoFactory daoFactory;
 
-    BaseService(SessionDao sessionDao) {
-        this.sessionDao = sessionDao;
+    BaseService(DaoFactory daoFactory) {
+        this.daoFactory = daoFactory;
+    }
+
+    protected DaoFactory getDaos() {
+        return daoFactory;
     }
 
     protected void validateRequest(Request request) {
@@ -77,8 +81,8 @@ public class BaseService {
     }
 
     private void validateAuth(AuthToken authToken) {
-        String associatedUser = sessionDao.getAssociatedUsername(authToken);
-        authToken = sessionDao.updateTimestamp(authToken);
+        String associatedUser = getDaos().getSessionDao().getAssociatedUsername(authToken);
+        authToken = getDaos().getSessionDao().updateTimestamp(authToken);
         long currentTime = System.currentTimeMillis();
         if (associatedUser == null || isExpiredAuthToken(authToken, currentTime)) {
             cleanExpiredSessions(); // TODO: should be done as a background job or something...
@@ -90,9 +94,9 @@ public class BaseService {
 
     private void cleanExpiredSessions() {
         long currentTime = System.currentTimeMillis();
-        sessionDao.getAuthTokens().forEach((authToken -> {
+        getDaos().getSessionDao().getAuthTokens().forEach((authToken -> {
             if (isExpiredAuthToken(authToken, currentTime)) {
-                sessionDao.revokeSession(authToken);
+                getDaos().getSessionDao().revokeSession(authToken);
             }
         }));
     }
@@ -104,6 +108,6 @@ public class BaseService {
 
     private void resetExpiration(AuthToken authToken) {
         authToken.setTimestamp(System.currentTimeMillis());
-        sessionDao.saveUpdatedTimestamp(authToken);
+        getDaos().getSessionDao().saveUpdatedTimestamp(authToken);
     }
 }

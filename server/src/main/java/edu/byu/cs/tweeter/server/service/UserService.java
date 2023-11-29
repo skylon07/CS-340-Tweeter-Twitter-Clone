@@ -9,8 +9,7 @@ import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
-import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
-import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException;
 
@@ -19,18 +18,15 @@ import java.util.Random;
 public class UserService extends BaseService {
     private static final String TOKEN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    private final UserDao userDao;
-
-    public UserService(SessionDao sessionDao, UserDao userDao) {
-        super(sessionDao);
-        this.userDao = userDao;
+    public UserService(DaoFactory daoFactory) {
+        super(daoFactory);
     }
 
     public LoginResponse login(LoginRequest request) {
         validateLoginRequest(request);
-        if (!userDao.isValidPassword(request.getUsername(), request.getPassword())) throw new BadRequestException("Incorrect password given for user '" + request.getUsername() + "'");
+        if (!getDaos().getUserDao().isValidPassword(request.getUsername(), request.getPassword())) throw new BadRequestException("Incorrect password given for user '" + request.getUsername() + "'");
 
-        User user = userDao.getUserForLogin(request.getUsername());
+        User user = getDaos().getUserDao().getUserForLogin(request.getUsername());
         assert user != null : "User could not be found even though their password was retrieved";
 
         AuthToken newToken = generateNewAuthTokenFor(request.getUsername());
@@ -41,7 +37,7 @@ public class UserService extends BaseService {
         try {
             validateAuthorizedRequest(request);
 
-            sessionDao.revokeSession(request.getAuthToken());
+            getDaos().getSessionDao().revokeSession(request.getAuthToken());
         } catch (UnauthorizedRequestException error) {
             // guess their token already got cleaned up!
         }
@@ -51,11 +47,11 @@ public class UserService extends BaseService {
 
     public LoginResponse register(RegisterRequest request) {
         validateRegisterRequest(request);
-        if (userDao.getUser(request.getUsername()) != null) throw new BadRequestException("User alias already taken");
+        if (getDaos().getUserDao().getUser(request.getUsername()) != null) throw new BadRequestException("User alias already taken");
 
-        User newUser = userDao.createUser(request.getFirstName(), request.getLastName(), request.getUsername(), request.getImage());
+        User newUser = getDaos().getUserDao().createUser(request.getFirstName(), request.getLastName(), request.getUsername(), request.getImage());
 
-        userDao.savePassword(request.getUsername(), request.getPassword());
+        getDaos().getUserDao().savePassword(request.getUsername(), request.getPassword());
         AuthToken newToken = generateNewAuthTokenFor(request.getUsername());
 
         return new LoginResponse(newUser, newToken);
@@ -64,7 +60,7 @@ public class UserService extends BaseService {
     public UserResponse getUser(UserTargetedRequest request) {
         validateUserTargetedRequest(request);
 
-        return new UserResponse(userDao.getUser(request.getTargetAlias()));
+        return new UserResponse(getDaos().getUserDao().getUser(request.getTargetAlias()));
     }
 
     private AuthToken generateNewAuthTokenFor(String username) {
@@ -77,7 +73,7 @@ public class UserService extends BaseService {
         AuthToken newToken = new AuthToken(newTokenString, System.currentTimeMillis());
 
         assert username != null : "Cannot create auth token without a username";
-        sessionDao.createSession(username, newToken);
+        getDaos().getSessionDao().createSession(username, newToken);
 
         return newToken;
     }

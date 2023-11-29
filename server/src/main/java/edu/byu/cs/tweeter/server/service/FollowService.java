@@ -10,9 +10,7 @@ import edu.byu.cs.tweeter.model.net.response.CountResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
-import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
-import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
-import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 import edu.byu.cs.tweeter.util.Pair;
 
@@ -20,26 +18,22 @@ import edu.byu.cs.tweeter.util.Pair;
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService extends BaseService {
-    private final FollowDao followDao;
-    private final UserDao userDao;
 
-    public FollowService(SessionDao sessionDao, FollowDao followDao, UserDao userDao) {
-        super(sessionDao);
-        this.followDao = followDao;
-        this.userDao = userDao;
+    public FollowService(DaoFactory daoFactory) {
+        super(daoFactory);
     }
 
     public UsersResponse getFollowers(PagedRequestByString request) {
         validatePagedRequest(request);
 
-        Pair<List<User>, Boolean> pageData = followDao.getFollowers(request.getTargetAlias(), request.getLimit(), request.getLastItem());
+        Pair<List<User>, Boolean> pageData = getDaos().getFollowDao().getFollowers(request.getTargetAlias(), request.getLimit(), request.getLastItem());
         return new UsersResponse(pageData.getFirst(), pageData.getSecond());
     }
 
     public CountResponse countFollowers(UserTargetedRequest request) {
         validateUserTargetedRequest(request);
 
-        Integer count = followDao.getFollowerCount(request.getTargetAlias());
+        Integer count = getDaos().getFollowDao().getFollowerCount(request.getTargetAlias());
         return new CountResponse(count);
     }
 
@@ -55,21 +49,21 @@ public class FollowService extends BaseService {
     public UsersResponse getFollowing(PagedRequestByString request) {
         validatePagedRequest(request);
 
-        Pair<List<User>, Boolean> pageData = followDao.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem());
+        Pair<List<User>, Boolean> pageData = getDaos().getFollowDao().getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem());
         return new UsersResponse(pageData.getFirst(), pageData.getSecond());
     }
 
     public CountResponse countFollowing(UserTargetedRequest request) {
         validateUserTargetedRequest(request);
 
-        Integer count = followDao.getFolloweeCount(request.getTargetAlias());
+        Integer count = getDaos().getFollowDao().getFolloweeCount(request.getTargetAlias());
         return new CountResponse(count);
     }
 
     public IsFollowingResponse isFollowing(FollowsRequest request) {
         validateFollowsRequest(request);
 
-        boolean isFollowing = followDao.isFollowing(request.getFollowerAlias(), request.getFolloweeAlias());
+        boolean isFollowing = getDaos().getFollowDao().isFollowing(request.getFollowerAlias(), request.getFolloweeAlias());
         return new IsFollowingResponse(isFollowing);
     }
 
@@ -77,9 +71,9 @@ public class FollowService extends BaseService {
         validateFollowsRequest(request);
         checkValidFollowsRequest(request);
 
-        User follower = userDao.getUser(request.getFollowerAlias());
-        User followee = userDao.getUser(request.getFolloweeAlias());
-        followDao.recordFollow(follower, followee);
+        User follower = getDaos().getUserDao().getUser(request.getFollowerAlias());
+        User followee = getDaos().getUserDao().getUser(request.getFolloweeAlias());
+        getDaos().getFollowDao().recordFollow(follower, followee);
         return new Response();
     }
 
@@ -87,12 +81,12 @@ public class FollowService extends BaseService {
         validateFollowsRequest(request);
         checkValidFollowsRequest(request);
 
-        followDao.removeFollow(request.getFollowerAlias(), request.getFolloweeAlias());
+        getDaos().getFollowDao().removeFollow(request.getFollowerAlias(), request.getFolloweeAlias());
         return new Response();
     }
 
     void checkValidFollowsRequest(FollowsRequest request) {
-        String actingUserAlias = sessionDao.getAssociatedUsername(request.getAuthToken());
+        String actingUserAlias = getDaos().getSessionDao().getAssociatedUsername(request.getAuthToken());
         if (!actingUserAlias.equals(request.getFollowerAlias())) throw new BadRequestException("User can only request following changes as the follower");
     }
 }
