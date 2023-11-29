@@ -28,7 +28,7 @@ public class SessionBean {
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
-    public AuthToken toAuthToken() {
+    public AuthToken asAuthToken() {
         return new AuthToken(token, timestamp);
     }
 }

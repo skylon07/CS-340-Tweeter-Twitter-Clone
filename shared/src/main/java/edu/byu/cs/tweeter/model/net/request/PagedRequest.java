@@ -6,7 +6,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
  * Contains all the information needed to make a request to have the server return the next page of
  * followees for a specified follower.
  */
-public class PagedRequest<ItemT> extends UserTargetedRequest {
+public abstract class PagedRequest<ItemT> extends UserTargetedRequest {
     private Integer limit;
     private ItemT lastItem;
 

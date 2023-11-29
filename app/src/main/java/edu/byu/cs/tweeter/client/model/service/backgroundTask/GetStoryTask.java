@@ -9,9 +9,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByLong;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
-import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that retrieves a page of statuses from a user's story.
@@ -24,7 +23,11 @@ public class GetStoryTask extends PagedStatusTask {
 
     @Override
     protected PagedResponse<Status> callApiForPage() throws IOException, TweeterRemoteException {
-        PagedRequest<Status> request = new PagedRequest<>(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem());
+        Long lastTimestamp = null;
+        if (getLastItem() != null) {
+            lastTimestamp = getLastItem().getTimestamp();
+        }
+        PagedRequestByLong request = new PagedRequestByLong(getAuthToken(), getTargetUser().getAlias(), getLimit(), lastTimestamp);
         return getServerFacade().getStory(request);
     }
 }

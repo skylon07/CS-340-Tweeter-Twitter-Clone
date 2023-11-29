@@ -333,7 +333,9 @@ public class FeedFragment extends Fragment implements FeedPresenter.View<Status>
          * the loading footer at the bottom of the list.
          */
         private void removeLoadingFooter() {
-            removeItem(feed.get(feed.size() - 1));
+            if (feed.size() > 0) {
+                removeItem(feed.get(feed.size() - 1));
+            }
         }
     }
 

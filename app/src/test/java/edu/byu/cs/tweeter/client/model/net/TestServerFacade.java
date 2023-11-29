@@ -11,7 +11,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByLong;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
 import edu.byu.cs.tweeter.model.net.response.CountResponse;
@@ -80,7 +81,7 @@ public class TestServerFacade {
 
     @Test
     public void testGetFollowers() throws IOException, TweeterRemoteException {
-        PagedRequest<User> request = new PagedRequest<>(getDummyToken(), "@testusername1", 5, null);
+        PagedRequestByString request = new PagedRequestByString(getDummyToken(), "@testusername1", 5, null);
         UsersResponse response = facadeSpy.getFollowers(request);
 
         Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
@@ -88,7 +89,7 @@ public class TestServerFacade {
         assert response.getResults().size() == 5;
 
         User lastUser = response.getResults().get(4);
-        request = new PagedRequest<>(getDummyToken(), "@testusername1", 5, lastUser);
+        request = new PagedRequestByString(getDummyToken(), "@testusername1", 5, lastUser.getAlias());
         UsersResponse response2 = facadeSpy.getFollowers(request);
 
         Mockito.verify(communicatorSpy, Mockito.times(2)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
@@ -103,31 +104,31 @@ public class TestServerFacade {
     @Test
     public void testGetFollowersMissingParams() throws IOException, TweeterRemoteException {
         Assertions.assertThrows(TweeterRequestException.class, () -> {
-            PagedRequest<User> request = new PagedRequest<>(null, "@testusername1", 5, null);
+            PagedRequestByString request = new PagedRequestByString(null, "@testusername1", 5, null);
             facadeSpy.getFollowers(request);
         });
-        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
+        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequestByString.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
         Mockito.reset(communicatorSpy);
 
         Assertions.assertThrows(TweeterRequestException.class, () -> {
-            PagedRequest<User> request = new PagedRequest<>(getDummyToken(), null, 5, null);
+            PagedRequestByString request = new PagedRequestByString(getDummyToken(), null, 5, null);
             facadeSpy.getFollowers(request);
         });
-        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
+        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequestByString.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
         Mockito.reset(communicatorSpy);
 
         Assertions.assertThrows(TweeterRequestException.class, () -> {
-            PagedRequest<User> request = new PagedRequest<>(getDummyToken(), "@testusername1", null, null);
+            PagedRequestByString request = new PagedRequestByString(getDummyToken(), "@testusername1", null, null);
             facadeSpy.getFollowers(request);
         });
-        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
+        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequestByString.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
         Mockito.reset(communicatorSpy);
 
         Assertions.assertThrows(TweeterRequestException.class, () -> {
-            PagedRequest<User> request = new PagedRequest<>(null, null, null, null);
+            PagedRequestByString request = new PagedRequestByString(null, null, null, null);
             facadeSpy.getFollowers(request);
         });
-        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
+        Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getfollowers"), Mockito.any(PagedRequestByString.class), Mockito.eq(null), Mockito.eq(UsersResponse.class));
         Mockito.reset(communicatorSpy);
     }
 
@@ -166,7 +167,7 @@ public class TestServerFacade {
 
     @Test
     public void testGetStory() throws IOException, TweeterRemoteException {
-        PagedRequest<Status> request = new PagedRequest<>(getDummyToken(), "@testusername1", 5, null);
+        PagedRequestByLong request = new PagedRequestByLong(getDummyToken(), "@testusername1", 5, null);
         PagedResponse<Status> response = facadeSpy.getStory(request);
 
         Mockito.verify(communicatorSpy, Mockito.times(1)).doPost(Mockito.eq("/getstory"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(StatusesResponse.class));
@@ -174,7 +175,7 @@ public class TestServerFacade {
         assert response.getResults().size() == 5;
 
         Status lastStatus = response.getResults().get(4);
-        request = new PagedRequest<>(getDummyToken(), "@testusername1", 5, lastStatus);
+        request = new PagedRequestByLong(getDummyToken(), "@testusername1", 5, lastStatus);
         PagedResponse<Status> response2 = facadeSpy.getStory(request);
 
         Mockito.verify(communicatorSpy, Mockito.times(2)).doPost(Mockito.eq("/getstory"), Mockito.any(PagedRequest.class), Mockito.eq(null), Mockito.eq(StatusesResponse.class));

@@ -12,6 +12,7 @@ import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
+import edu.byu.cs.tweeter.server.service.exceptions.UnauthorizedRequestException;
 
 import java.util.Random;
 
@@ -37,9 +38,14 @@ public class UserService extends BaseService {
     }
 
     public Response logout(AuthorizedRequest request) {
-        validateAuthorizedRequest(request);
+        try {
+            validateAuthorizedRequest(request);
 
-        sessionDao.revokeSession(request.getAuthToken());
+            sessionDao.revokeSession(request.getAuthToken());
+        } catch (UnauthorizedRequestException error) {
+            // guess their token already got cleaned up!
+        }
+
         return new Response();
     }
 

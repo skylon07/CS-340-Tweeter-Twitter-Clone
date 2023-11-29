@@ -7,7 +7,7 @@ import java.io.IOException;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 
 /**
@@ -22,7 +22,11 @@ public class GetFollowingTask extends PagedUserTask {
 
     @Override
     protected PagedResponse<User> callApiForPage() throws IOException, TweeterRemoteException {
-        PagedRequest<User> request = new PagedRequest<>(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem());
+        String lastAlias = null;
+        if (getLastItem() != null) {
+            lastAlias = getLastItem().getAlias();
+        }
+        PagedRequestByString request = new PagedRequestByString(getAuthToken(), getTargetUser().getAlias(), getLimit(), lastAlias);
         return getServerFacade().getFollowing(request);
     }
 }

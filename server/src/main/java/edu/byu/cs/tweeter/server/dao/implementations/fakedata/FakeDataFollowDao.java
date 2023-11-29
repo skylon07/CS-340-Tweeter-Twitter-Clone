@@ -37,7 +37,7 @@ public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
      * @return the followees.
      */
     @Override
-    public Pair<List<User>, Boolean> getFollowees(String followerAlias, int limit, User lastFollowee) {
+    public Pair<List<User>, Boolean> getFollowees(String followerAlias, int limit, String lastFolloweeAlias) {
         // TODO: Generates dummy data. Replace with a real implementation.
         assert limit > 0;
         assert followerAlias != null;
@@ -49,8 +49,8 @@ public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
 
         if(limit > 0) {
             if (allFollowees != null) {
-                int followeesIndex = lastFollowee != null ?
-                    getFolloweesStartingIndex(lastFollowee.getAlias(), allFollowees) : 0;
+                int followeesIndex = lastFolloweeAlias != null ?
+                    getFolloweesStartingIndex(lastFolloweeAlias, allFollowees) : 0;
 
                 for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < limit; followeesIndex++, limitCounter++) {
                     responseFollowees.add(allFollowees.get(followeesIndex));
@@ -64,8 +64,8 @@ public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
     }
 
     @Override
-    public Pair<List<User>, Boolean> getFollowers(String followeeAlias, int limit, User lastFollower) {
-        return getFollowees(followeeAlias, limit, lastFollower);
+    public Pair<List<User>, Boolean> getFollowers(String followeeAlias, int limit, String lastFollowerAlias) {
+        return getFollowees(followeeAlias, limit, lastFollowerAlias);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
     }
 
     @Override
-    public void recordFollow(String followerAlias, String followeeAlias) {
+    public void recordFollow(User follower, User followee) {
         return; // intentionally left blank (nothing to record)
     }
 

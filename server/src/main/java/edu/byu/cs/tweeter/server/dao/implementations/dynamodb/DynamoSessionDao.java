@@ -44,7 +44,9 @@ public class DynamoSessionDao extends DynamoDao implements SessionDao {
             .partitionValue(token.getToken())
             .build();
         SessionBean knownSession = sessionTable.getItem(key);
-        token.setTimestamp(knownSession.getTimestamp());
+        if (knownSession != null) {
+            token.setTimestamp(knownSession.getTimestamp());
+        }
         return token;
     }
 
@@ -60,13 +62,10 @@ public class DynamoSessionDao extends DynamoDao implements SessionDao {
 
     @Override
     public Stream<AuthToken> getAuthTokens() {
-        QueryEnhancedRequest request = QueryEnhancedRequest.builder()
-            .scanIndexForward(true)
-            .build();
         return sessionTable
-            .query(request)
+            .scan()
             .items()
             .stream()
-            .map(SessionBean::toAuthToken);
+            .map(SessionBean::asAuthToken);
     }
 }

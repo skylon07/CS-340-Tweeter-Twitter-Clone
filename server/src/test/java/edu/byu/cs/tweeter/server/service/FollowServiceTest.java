@@ -9,18 +9,20 @@ import java.util.Arrays;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class FollowServiceTest {
 
-    private PagedRequest<User> request;
+    private PagedRequestByString request;
     private UsersResponse expectedResponse;
     private SessionDao mockSessionDAO;
     private FollowDao mockFollowDAO;
+    private UserDao mockUserDAO;
     private FollowService followServiceSpy;
 
     @BeforeEach
@@ -37,16 +39,17 @@ public class FollowServiceTest {
                 "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/daisy_duck.png");
 
         // Setup a request object to use in the tests
-        request = new PagedRequest<User>(authToken, currentUser.getAlias(), 3, null);
+        request = new PagedRequestByString(authToken, currentUser.getAlias(), 3, null);
 
         // Setup a mock FollowDAO that will return known responses
         expectedResponse = new UsersResponse(Arrays.asList(resultUser1, resultUser2, resultUser3), false);
         mockSessionDAO = Mockito.mock(SessionDao.class);
         mockFollowDAO = Mockito.mock(FollowDao.class);
+        mockUserDAO = Mockito.mock(UserDao.class);
         Mockito.when(mockFollowDAO.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem()))
                 .thenReturn(new Pair<>(expectedResponse.getResults(), expectedResponse.getHasMorePages()));
 
-        followServiceSpy = Mockito.spy(new FollowService(mockSessionDAO, mockFollowDAO));
+        followServiceSpy = Mockito.spy(new FollowService(mockSessionDAO, mockFollowDAO, mockUserDAO));
     }
 
     /**

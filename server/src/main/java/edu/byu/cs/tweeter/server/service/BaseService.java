@@ -77,8 +77,8 @@ public class BaseService {
     }
 
     private void validateAuth(AuthToken authToken) {
-        authToken = sessionDao.updateTimestamp(authToken);
         String associatedUser = sessionDao.getAssociatedUsername(authToken);
+        authToken = sessionDao.updateTimestamp(authToken);
         long currentTime = System.currentTimeMillis();
         if (associatedUser == null || isExpiredAuthToken(authToken, currentTime)) {
             cleanExpiredSessions(); // TODO: should be done as a background job or something...

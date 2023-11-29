@@ -37,7 +37,7 @@ public class UserBean {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public User toUser() {
+    public User asUser() {
         return new User(firstName, lastName, userAlias, imageUrl);
     }
 }

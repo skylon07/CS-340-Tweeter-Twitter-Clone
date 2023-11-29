@@ -24,10 +24,16 @@ public abstract class DynamoDao {
         .dynamoDbClient(dynamoDbClient)
         .build();
 
-    protected void setPageRequestStartKey(QueryEnhancedRequest.Builder requestBuilder, String keyAttr, String key, String pageItemAttr, String lastPageItem) {
+    protected void setPageRequestStartKey(QueryEnhancedRequest.Builder requestBuilder, String keyAttr, String key, String pageItemAttr, Object lastPageItem, boolean lastItemIsNumber) {
         Map<String, AttributeValue> startKey = new HashMap<>();
         startKey.put(keyAttr, AttributeValue.builder().s(key).build());
-        startKey.put(pageItemAttr, AttributeValue.builder().s(lastPageItem).build());
+        if (lastItemIsNumber) {
+            if (lastPageItem == null) throw new RuntimeException("AAAAAAAAAHHHHH");
+            startKey.put(pageItemAttr, AttributeValue.builder().n(lastPageItem.toString()).build());
+        } else {
+            String lastPageItemString = (String) lastPageItem;
+            startKey.put(pageItemAttr, AttributeValue.builder().s(lastPageItemString).build());
+        }
         requestBuilder.exclusiveStartKey(startKey);
     }
 
@@ -38,7 +44,7 @@ public abstract class DynamoDao {
             .limit(1)
             .forEach((page) -> {
                 hasMorePages.set(page.lastEvaluatedKey() != null);
-                page.items().forEach(mapper::mapPageItem);
+                page.items().forEach((item) -> results.add(mapper.mapPageItem(item)));
             });
         return new Pair<>(results, hasMorePages.get());
     }

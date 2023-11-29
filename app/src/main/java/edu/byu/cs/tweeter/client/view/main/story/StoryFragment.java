@@ -332,7 +332,9 @@ public class StoryFragment extends Fragment implements StoryPresenter.View<Statu
          * the loading footer at the bottom of the list.
          */
         private void removeLoadingFooter() {
-            removeItem(story.get(story.size() - 1));
+            if (story.size() > 0) {
+                removeItem(story.get(story.size() - 1));
+            }
         }
     }
 

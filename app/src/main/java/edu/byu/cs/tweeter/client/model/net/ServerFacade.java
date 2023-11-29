@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.Status;
-import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.AuthorizedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByLong;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.StatusRequest;
 import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
@@ -66,7 +65,7 @@ public class ServerFacade {
         return clientCommunicator.doPost(urlPath, request, null, UserResponse.class); // SHOULD BE GET!!!
     }
 
-    public UsersResponse getFollowers(PagedRequest<User> request) throws IOException, TweeterRemoteException {
+    public UsersResponse getFollowers(PagedRequestByString request) throws IOException, TweeterRemoteException {
         String urlPath = "/getfollowers"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/followers/users";
         return clientCommunicator.doPost(urlPath, request, null, UsersResponse.class); // SHOULD BE GET!!!
     }
@@ -76,7 +75,7 @@ public class ServerFacade {
         return clientCommunicator.doPost(urlPath, request, null, CountResponse.class); // SHOULD BE GET!!!
     }
 
-    public UsersResponse getFollowing(PagedRequest<User> request) throws IOException, TweeterRemoteException {
+    public UsersResponse getFollowing(PagedRequestByString request) throws IOException, TweeterRemoteException {
         String urlPath = "/getfollowing"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/following/users";
         return clientCommunicator.doPost(urlPath, request, null, UsersResponse.class); // SHOULD BE GET!!!
     }
@@ -106,12 +105,12 @@ public class ServerFacade {
         return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 
-    public StatusesResponse getStory(PagedRequest<Status> request) throws IOException, TweeterRemoteException {
+    public StatusesResponse getStory(PagedRequestByLong request) throws IOException, TweeterRemoteException {
         String urlPath = "/getstory"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/statuses";
         return clientCommunicator.doPost(urlPath, request, null, StatusesResponse.class); // SHOULD BE GET!!!
     }
 
-    public StatusesResponse getFeed(PagedRequest<Status> request) throws IOException, TweeterRemoteException {
+    public StatusesResponse getFeed(PagedRequestByLong request) throws IOException, TweeterRemoteException {
         String urlPath = "/getfeed"; // ideally would be "/users/" + sanitizeAlias(request.getTargetAlias()) + "/feed";
         return clientCommunicator.doPost(urlPath, request, null, StatusesResponse.class); // SHOULD BE GET!!!
     }

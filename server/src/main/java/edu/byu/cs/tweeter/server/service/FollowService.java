@@ -4,7 +4,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
-import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequestByString;
 import edu.byu.cs.tweeter.model.net.request.UserTargetedRequest;
 import edu.byu.cs.tweeter.model.net.response.CountResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
@@ -12,6 +12,7 @@ import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UsersResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.SessionDao;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
 import edu.byu.cs.tweeter.util.Pair;
 
@@ -20,13 +21,15 @@ import edu.byu.cs.tweeter.util.Pair;
  */
 public class FollowService extends BaseService {
     private final FollowDao followDao;
+    private final UserDao userDao;
 
-    public FollowService(SessionDao sessionDao, FollowDao followDao) {
+    public FollowService(SessionDao sessionDao, FollowDao followDao, UserDao userDao) {
         super(sessionDao);
         this.followDao = followDao;
+        this.userDao = userDao;
     }
 
-    public UsersResponse getFollowers(PagedRequest<User> request) {
+    public UsersResponse getFollowers(PagedRequestByString request) {
         validatePagedRequest(request);
 
         Pair<List<User>, Boolean> pageData = followDao.getFollowers(request.getTargetAlias(), request.getLimit(), request.getLastItem());
@@ -49,7 +52,7 @@ public class FollowService extends BaseService {
      * @param request contains the data required to fulfill the request.
      * @return the followees.
      */
-    public UsersResponse getFollowing(PagedRequest<User> request) {
+    public UsersResponse getFollowing(PagedRequestByString request) {
         validatePagedRequest(request);
 
         Pair<List<User>, Boolean> pageData = followDao.getFollowees(request.getTargetAlias(), request.getLimit(), request.getLastItem());
@@ -74,7 +77,9 @@ public class FollowService extends BaseService {
         validateFollowsRequest(request);
         checkValidFollowsRequest(request);
 
-        followDao.recordFollow(request.getFollowerAlias(), request.getFolloweeAlias());
+        User follower = userDao.getUser(request.getFollowerAlias());
+        User followee = userDao.getUser(request.getFolloweeAlias());
+        followDao.recordFollow(follower, followee);
         return new Response();
     }
 

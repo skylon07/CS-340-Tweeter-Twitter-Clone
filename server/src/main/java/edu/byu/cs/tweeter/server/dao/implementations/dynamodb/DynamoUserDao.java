@@ -20,14 +20,14 @@ import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
 public class DynamoUserDao extends DynamoDao implements UserDao {
+    public static final String userTableName = "Tweeter-users";
+    private static final DynamoDbTable<UserBean> userTable = enhancedClient.table(userTableName, TableSchema.fromBean(UserBean.class));
+
     private static final String S3_URL = "https://tweeter-images-18671.s3.us-west-1.amazonaws.com/";
     private static final AmazonS3 s3 = AmazonS3ClientBuilder
         .standard()
         .withRegion(Regions.US_WEST_1)
         .build();
-
-    public static final String userTableName = "Tweeter-users";
-    private static final DynamoDbTable<UserBean> userTable = enhancedClient.table(userTableName, TableSchema.fromBean(UserBean.class));
 
 
     @Override
@@ -38,7 +38,7 @@ public class DynamoUserDao extends DynamoDao implements UserDao {
         UserBean newBean = new UserBean(firstName, lastName, username, imageUrl);
         userTable.putItem(newBean);
 
-        return newBean.toUser();
+        return newBean.asUser();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class DynamoUserDao extends DynamoDao implements UserDao {
             .build();
         UserBean userBean = userTable.getItem(key);
         if (userBean == null) return null;
-        return userBean.toUser();
+        return userBean.asUser();
     }
 
     @Override
