@@ -51,8 +51,7 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
 
     public void updateFollowingAndFollowers() {
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
-        User user = Cache.getInstance().getCurrUser();
-        followService.loadFollowCounts(authToken, user, new FollowersCountObserver(), new FollowingCountObserver());
+        followService.loadFollowCounts(authToken, view.getCurrentUser(), new FollowersCountObserver(), new FollowingCountObserver());
     }
 
     public boolean currentUserIsLoggedInUser(User selectedUser) {
@@ -71,6 +70,7 @@ public class MainPresenter extends BasePresenter<MainPresenter.View> {
     }
 
     public interface View extends BasePresenter.View {
+        User getCurrentUser();
         void completeLogout();
         void showStatusDialog();
         void setFollowerCount(int count);
