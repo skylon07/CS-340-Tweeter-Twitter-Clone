@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.lambda;
+package edu.byu.cs.tweeter.server.lambda.scripts;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -17,7 +17,7 @@ import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 
-public class Scripts_AddManyUsersHandler implements RequestHandler<Request, Response> {
+public class AddManyUsersHandler implements RequestHandler<Request, Response> {
     // How many follower users to add
     // We recommend you test this with a smaller number first, to make sure it works for you
     private final static int NUM_USERS = 2000; // (for 10,000 users/follows, I needed like 500 write capacity units! geez!)

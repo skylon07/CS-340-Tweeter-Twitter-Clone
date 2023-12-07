@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.lambda;
+package edu.byu.cs.tweeter.server.lambda.endpoints;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
