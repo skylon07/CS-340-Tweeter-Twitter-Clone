@@ -10,7 +10,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.implementations.dynamodb.beans.UserBean;
@@ -18,8 +20,13 @@ import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 
 public class DynamoUserDao extends DynamoDao implements UserDao {
+    private static int BATCH_SIZE = 25;
+
     public static final String userTableName = "Tweeter-users";
     private static final DynamoDbTable<UserBean> userTable = enhancedClient.table(userTableName, TableSchema.fromBean(UserBean.class));
 
@@ -39,6 +46,29 @@ public class DynamoUserDao extends DynamoDao implements UserDao {
         userTable.putItem(newBean);
 
         return newBean.asUser();
+    }
+
+    @Override
+    public void createUserBatch(List<UserBean> users) {
+        List<UserBean> userQueue = users;
+        List<UserBean> unprocessedUsers;
+        while (!userQueue.isEmpty()) {
+            unprocessedUsers = new ArrayList<>();
+            for (int batchCount = 0; BATCH_SIZE * batchCount < userQueue.size(); ++batchCount) {
+                WriteBatch.Builder<UserBean> writeBatchBuilder = WriteBatch.builder(UserBean.class)
+                    .mappedTableResource(userTable);
+                for (int currBatchSize = 0, userIdx = BATCH_SIZE * batchCount; currBatchSize < BATCH_SIZE && userIdx < userQueue.size(); ++currBatchSize, ++userIdx) {
+                    UserBean user = userQueue.get(userIdx);
+                    writeBatchBuilder.addPutItem(user);
+                }
+                BatchWriteItemEnhancedRequest batchRequest = BatchWriteItemEnhancedRequest.builder()
+                    .writeBatches(writeBatchBuilder.build())
+                    .build();
+                BatchWriteResult result = enhancedClient.batchWriteItem(batchRequest);
+                unprocessedUsers.addAll(result.unprocessedPutItemsForTable(userTable));
+            }
+            userQueue = unprocessedUsers;
+        }
     }
 
     @Override

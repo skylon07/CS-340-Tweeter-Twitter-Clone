@@ -4,12 +4,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.dao.implementations.dynamodb.beans.UserBean;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 
 public class FakeDataUserDao extends FakeDataDao implements UserDao {
     @Override
     public User createUser(String firstName, String lastName, String username, String image) {
         return getUser(username);
+    }
+
+    @Override
+    public void createUserBatch(List<UserBean> users) {
+        // don't need to do anything!
     }
 
     @Override

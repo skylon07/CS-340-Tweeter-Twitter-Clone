@@ -1,20 +1,27 @@
 package edu.byu.cs.tweeter.server.dao.implementations.dynamodb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.server.dao.implementations.dynamodb.beans.FollowBean;
+import edu.byu.cs.tweeter.server.dao.implementations.dynamodb.beans.UserBean;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDao;
 import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 
 public class DynamoFollowDao extends DynamoDao implements FollowDao {
+    private static final int BATCH_SIZE = 25;
+
     public static final String followTableName = "Tweeter-follows";
     public static final String followIndexName = "Tweeter-follows-index";
 
@@ -103,6 +110,33 @@ public class DynamoFollowDao extends DynamoDao implements FollowDao {
     public void recordFollow(User follower, User followee) {
         FollowBean newBean = new FollowBean(follower, followee);
         followsTable.putItem(newBean);
+    }
+
+    @Override
+    public void recordFollowBatch(List<User> followers, User followee) {
+        List<FollowBean> followerQueue = new ArrayList<>();
+        for (User follower : followers) {
+            FollowBean followBean = new FollowBean(follower, followee);
+            followerQueue.add(followBean);
+        }
+        List<FollowBean> unprocessedFollows;
+        while (!followerQueue.isEmpty()) {
+            unprocessedFollows = new ArrayList<>();
+            for (int batchCount = 0; BATCH_SIZE * batchCount < followerQueue.size(); ++batchCount) {
+                WriteBatch.Builder<FollowBean> writeBatchBuilder = WriteBatch.builder(FollowBean.class)
+                    .mappedTableResource(followsTable);
+                for (int currBatchSize = 0, followIdx = BATCH_SIZE * batchCount; currBatchSize < BATCH_SIZE && followIdx < followerQueue.size(); ++currBatchSize, ++followIdx) {
+                    FollowBean followBean = followerQueue.get(followIdx);
+                    writeBatchBuilder.addPutItem(followBean);
+                }
+                BatchWriteItemEnhancedRequest batchRequest = BatchWriteItemEnhancedRequest.builder()
+                    .writeBatches(writeBatchBuilder.build())
+                    .build();
+                BatchWriteResult result = enhancedClient.batchWriteItem(batchRequest);
+                unprocessedFollows.addAll(result.unprocessedPutItemsForTable(followsTable));
+            }
+            followerQueue = unprocessedFollows;
+        }
     }
 
     @Override

@@ -84,6 +84,11 @@ public class FakeDataFollowDao extends FakeDataDao implements FollowDao {
     }
 
     @Override
+    public void recordFollowBatch(List<User> followerAliases, User followeeAlias) {
+        return; // intentionally left blank (nothing to batch record)
+    }
+
+    @Override
     public void removeFollow(String followerAlias, String followeeAlias) {
         return; // intentionally left blank (nothing to remove)
     }

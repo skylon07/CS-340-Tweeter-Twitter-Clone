@@ -12,5 +12,6 @@ public interface FollowDao {
     Integer getFollowerCount(String followeeAlias);
     boolean isFollowing(String followerAlias, String followeeAlias);
     void recordFollow(User follower, User followee);
+    void recordFollowBatch(List<User> followers, User followee);
     void removeFollow(String followerAlias, String followeeAlias);
 }
