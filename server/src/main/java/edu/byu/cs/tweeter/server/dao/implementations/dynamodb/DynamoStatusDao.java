@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.dao.implementations.dynamodb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -10,11 +11,16 @@ import edu.byu.cs.tweeter.util.Pair;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 
 public class DynamoStatusDao extends DynamoDao implements StatusDao {
+    private static final int BATCH_SIZE = 25;
+
     public static final String statusTableName = "Tweeter-statuses";
     public static final String feedTableName = "Tweeter-feeds";
 
@@ -69,13 +75,35 @@ public class DynamoStatusDao extends DynamoDao implements StatusDao {
     }
 
     @Override
-    public void postStatusToStoryAndFeeds(User poster, List<String> followerAliases, String post, Long timestamp) {
+    public void postStatusToStory(User poster, String post, Long timestamp) {
         StatusBean newBean = new StatusBean(poster.getAlias(), timestamp, poster, post, Status.parseURLs(post), Status.parseMentions(post));
         statusTable.putItem(newBean);
+    }
 
+    @Override
+    public void postStatusToFeeds(List<String> followerAliases, User poster, String post, Long timestamp) {
+        List<StatusBean> statusQueue = new ArrayList<>();
         for (String followerAlias : followerAliases) {
-            newBean.setUserAlias(followerAlias);
-            feedTable.putItem(newBean);
+            StatusBean statusBean = new StatusBean(followerAlias, timestamp, poster, post, Status.parseURLs(post), Status.parseMentions(post));;
+            statusQueue.add(statusBean);
+        }
+        List<StatusBean> unprocessedFollows;
+        while (!statusQueue.isEmpty()) {
+            unprocessedFollows = new ArrayList<>();
+            for (int batchCount = 0; BATCH_SIZE * batchCount < statusQueue.size(); ++batchCount) {
+                WriteBatch.Builder<StatusBean> writeBatchBuilder = WriteBatch.builder(StatusBean.class)
+                    .mappedTableResource(feedTable);
+                for (int currBatchSize = 0, statusIdx = BATCH_SIZE * batchCount; currBatchSize < BATCH_SIZE && statusIdx < statusQueue.size(); ++currBatchSize, ++statusIdx) {
+                    StatusBean statusBean = statusQueue.get(statusIdx);
+                    writeBatchBuilder.addPutItem(statusBean);
+                }
+                BatchWriteItemEnhancedRequest batchRequest = BatchWriteItemEnhancedRequest.builder()
+                    .writeBatches(writeBatchBuilder.build())
+                    .build();
+                BatchWriteResult result = enhancedClient.batchWriteItem(batchRequest);
+                unprocessedFollows.addAll(result.unprocessedPutItemsForTable(feedTable));
+            }
+            statusQueue = unprocessedFollows;
         }
     }
 }

@@ -20,8 +20,8 @@ import edu.byu.cs.tweeter.server.dao.interfaces.UserDao;
 public class AddManyUsersHandler implements RequestHandler<Request, Response> {
     // How many follower users to add
     // We recommend you test this with a smaller number first, to make sure it works for you
-    private final static int NUM_USERS = 2000; // (for 10,000 users/follows, I needed like 500 write capacity units! geez!)
-    private final static int START_OFFSET = 8000;
+    private final static int NUM_USERS = 10000; // (for 10,000 users/follows, I needed like 500 write capacity units! geez!)
+    private final static int START_OFFSET = 0;
 
     // The alias of the user to be followed by each user created
     // This example code does not add the target user, that user must be added separately.

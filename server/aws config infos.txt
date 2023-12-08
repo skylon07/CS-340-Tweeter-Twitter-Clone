@@ -1,0 +1,112 @@
+This module was designed to work within the AWS architecture. Everything can be configured via https://us-west-1.console.aws.amazon.com/.
+
+This is a list of AWS services used:
+- API Gateway
+- Lambda
+- DynamoDB
+- Simple Queue Service
+
+
+
+============= API GATEWAY ==============
+
+The API defined/used in this class is... nonstandard, to say the least. Each endpoint is called by the POST method. This can be seen in the `Tweeter Backend-production-swagger.json` file next to this one.
+
+In order to get this to work, the API must be defined in API Gateway then deployed to a stage. In this case, the stage name I used is "production", but this is arbitrary.
+
+When making endpoints, I was told to make sure CORS was enabled. This caused an OPTIONS method to be generated with each endpoint. I never tested what happens if I don't do this, but I did notice that not enabling CORS caused the OPTIONS method to not be generated.
+
+The endpoints (they should be self explanatory):
+	/countfollowers
+	/countfollowing
+	/follow
+	/getfeed
+	/getfollowers
+	/getfollowing
+	/getstory
+	/getuser
+	/isfollowing
+	/login
+	/logout
+	/poststatus
+	/register
+	/unfollow
+
+Each endpoint had to be configured to send 200, 400, and 500 responses. The 200s worked out of the box. To get 400s and 500s working, I had to click the POST method and add the response codes to the "Method responses". After that, they show up for configuration in the "Integration response". Here I set regular expressions to match error strings with response codes.
+
+400 = "^\[Bad Request\].*"
+500 = ".+"
+
+There is another feature called "mapping templates" that are pretty neat and allow you to construct requests/responses from query parameters, headers, etc. This project doesn't use this feature at all, but I did mess around with it a little bit (when I was designing a fully-fledged API, *before* I was told it was supposed to be stupid dumb...)
+
+We weren't ever told of any cost pitfalls for API Gateway -- I think it's just a charge per endpoint call or something like that.
+
+
+
+================ LAMBDA ================
+
+Most lambdas are tied directly to an endpoint as a trigger. Setting them up was fairly straightforward. This server module was compiled with Java 11, so unless the `server-all.jar` file is recompiled for a different version, the lambdas need to match this. (Building the jar file can be done in Android Studio by clicking on the [Gradle] tab, navigating to `server/Tasks/shadow`, and running `shadowJar`. This produces `server/build/libs/server-all.jar`.)
+
+I was told by a TA that the lambdas had to be configured to use 2048MB of memory to avoid several problems (from invocation timeouts to the logger not loading properly). Apparently this also increases the number of processors that run it...? I'm not sure if I believe that, but nonetheless the lambdas did run faster with this setting.
+
+Each lambda uses the "Tweeter-Lambda" role, which uses these permissions:
+- AmazonDynamoDBFullAccess
+- AmazonS3FullAccess
+- AmazonSQSFullAccess
+- CloudWatchLogsFullAccess
+
+Here is the list of lambdas (and things they were tied to):
+	tweeter-background-postedstatus		(sqs queue) tweeter-postedstatus
+	tweeter-background-updatefeed		(sqs queue) tweeter-updatefeed
+	tweeter-scripts-addmanyusers		(NA -- is a DB population script run by sending test events)
+	tweeter-countfollowers				/countfollowers
+	tweeter-countfollowing				/countfollowing
+	tweeter-follow						/follow
+	tweeter-getfeed						/getfeed
+	tweeter-getfollowers				/getfollowers
+	tweeter-getfollowing				/getfollowing
+	tweeter-getstory					/getstory
+	tweeter-getuser						/getuser
+	tweeter-isfollowing					/isfollowing
+	tweeter-login						/login
+	tweeter-logout						/logout
+	tweeter-poststatus					/poststatus
+	tweeter-register					/register
+	tweeter-unfollow					/unfollow
+
+One last thing to note: The tweeter-background-postedstatus lambda sometimes timed out at the default 15 seconds, so I upped it to 30 (which is also the default queue message visibility time). I also upped the tweeter-background-updatefeed lambda to 20 seconds, although once I decreased the batch sizes to a better amount I realized this might not have been necessary. Also, increasing the timeout time for the tweeter-scripts-addmanyusers lambda is necessary if the whole 10k users operation is done at once. (Don't forget to set the write capacity for the DB too!)
+
+There are no cost pitfalls for lambdas. You are just charged for a few things like time spent in the lambda and data transferred over the network, etc. If lambdas aren't ever called, you aren't ever charged.
+
+
+
+============== DYNAMO DB ===============
+
+To avoid excessive AWS charges, we were advised to set the capacity mode to "Provisioned" with auto-scaling off. Apparently auto-scaling generates lots of logs, which can cost $$$. Having 2-3 read capacity units and 1 write capacity unit per table is just fine for most usages (see the "large user count" section below).
+
+Each table was created as a "DynamoDB Standard" table. Tweeter-follows also has a global index, but I don't remember if that's configured on table creation or after.
+
+Tables used and their associated `Bean` class (look at those classes to find the annotated partition/sort key properties):
+	Tweeter-feeds 		(StatusBean)
+	Tweeter-follows 	(FollowBean)
+	Tweeter-sessions 	(SessionBean)
+	Tweeter-statuses	(StatusBean)
+	Tweeter-users		(UserBean)
+
+To test the application under large follower counts, a larger read capacity (~50 for 10k followers) is needed for Tweeter-follows (because I never added a cached count value :P ) and a larger write capacity (~100 for 10k followers) is needed for Tweeter-feeds. When running the tweeter-scripts-addmanyusers lambda, make sure to set both the Tweeter-follows table AND index to a higher write capacity, and also the Tweeter-users table. Just don't forget to turn all these values down again! (That's really the only cost pitfall here.)
+
+
+
+========= SIMPLE QUEUE SERVICE =========
+
+Creating the queues was fairly straightforward. We used "Standard" queues for the class, but apparently (according to what one student on the class Slack said) it's not too difficult to get it working with FIFO queues too. We were told to keep all the default settings when creating these.
+
+There are only two queues and their associated lambdas:
+	tweeter-postedstatus		(tweeter-background-postedstatus)
+	tweeter-updatefeed			(tweeter-background-updatefeed)
+
+Lambdas are added as triggers after the queue is created.
+
+SQS Queues constantly poll for messages to send to the lambdas, so the lambdas should be disconnected when the queues aren't in use. The queues can hang around without incurring charges (or so it seemed to me when I did this project); we were told that charges start happening when you start hooking stuff up to the queue.
+
+One other potential cost pitfall is that if a lambda times out, the message gets put back into the queue for another lambda instance to process. If this were to be, say, the tweeter-background-postedstatus lambda (totally didn't cause me hours of panic and grief), this means update feed jobs will keep being generated for the tweeter-updatefeed queue (even if I disconnect all the lambdas...?). Basically, just make sure all pending messages are deleted from both queues before leaving them overnight (and make sure you don't just delete one page -- it makes it look like all messages are deleted when that's not actually true).

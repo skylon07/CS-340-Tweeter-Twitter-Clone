@@ -25,7 +25,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 
 public class DynamoUserDao extends DynamoDao implements UserDao {
-    private static int BATCH_SIZE = 25;
+    private static final int BATCH_SIZE = 25;
 
     public static final String userTableName = "Tweeter-users";
     private static final DynamoDbTable<UserBean> userTable = enhancedClient.table(userTableName, TableSchema.fromBean(UserBean.class));
@@ -92,6 +92,7 @@ public class DynamoUserDao extends DynamoDao implements UserDao {
             .partitionValue(username)
             .build();
         UserBean userBean = userTable.getItem(key);
+        if (userBean == null) return false;
         String userHash = userBean.getPasswordHash();
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.matches(password, userHash);

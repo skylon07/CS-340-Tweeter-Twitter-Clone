@@ -21,7 +21,12 @@ public class FakeDataStatusDao extends FakeDataDao implements StatusDao {
     }
 
     @Override
-    public void postStatusToStoryAndFeeds(User poster, List<String> followerAliases, String post, Long timestamp) {
-        return; // intentionally left blank (nothing to post to)
+    public void postStatusToStory(User poster, String post, Long timestamp) {
+        return; // nothing to post
+    }
+
+    @Override
+    public void postStatusToFeeds(List<String> followerAliases, User poster, String post, Long timestamp) {
+        return; // nothing to post
     }
 }

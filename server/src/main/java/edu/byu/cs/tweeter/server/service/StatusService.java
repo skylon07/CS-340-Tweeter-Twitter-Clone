@@ -1,7 +1,6 @@
 package edu.byu.cs.tweeter.server.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -11,9 +10,13 @@ import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.DaoFactory;
 import edu.byu.cs.tweeter.server.service.exceptions.BadRequestException;
+import edu.byu.cs.tweeter.server.sqs.SqsClient;
 import edu.byu.cs.tweeter.util.Pair;
 
 public class StatusService extends BaseService {
+    // TODO: could be abstracted into a factory like the DAOs
+    private static final SqsClient sqsClient = new SqsClient();
+
     public StatusService(DaoFactory daoFactory) {
         super(daoFactory);
     }
@@ -22,13 +25,24 @@ public class StatusService extends BaseService {
         validateStatusRequest(request);
         checkValidStatusRequest(request);
 
-        // TODO: needs to be a background task that updates statuses for all followers
-        List<User> followers = getDaos().getFollowDao().getFollowers(request.getTargetAlias(), Integer.MAX_VALUE, null).getFirst();
-        List<String> followerAliases = followers.stream().map(User::getAlias).collect(Collectors.toList());
-
         User poster = getDaos().getUserDao().getUser(request.getTargetAlias());
-        getDaos().getStatusDao().postStatusToStoryAndFeeds(poster, followerAliases, request.getPost(), request.getTimestamp());
+        // TODO: feels a little weird the DAO isn't passed the status...
+        getDaos().getStatusDao().postStatusToStory(poster, request.getPost(), request.getTimestamp());
+
+        Status status = new Status(
+            request.getPost(),
+            poster,
+            request.getTimestamp(),
+            Status.parseURLs(request.getPost()),
+            Status.parseMentions(request.getPost())
+        );
+        sqsClient.sendPostedStatusMessage(status);
+
         return new Response();
+    }
+
+    public void postStatusToFeeds(List<String> followerAliases, Status status) {
+        getDaos().getStatusDao().postStatusToFeeds(followerAliases, status.getUser(), status.getPost(), status.getTimestamp());
     }
 
     public StatusesResponse getFeed(PagedRequestByLong request) {
