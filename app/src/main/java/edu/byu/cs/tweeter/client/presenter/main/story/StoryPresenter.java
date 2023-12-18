@@ -6,11 +6,15 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class StoryPresenter extends PagingPresenter<Status, StoryPresenter.View<Status>> {
+public class StoryPresenter extends PagingPresenter<Status, StoryPresenter.View> {
     private final StatusService statusService = new StatusService();
 
-    public StoryPresenter(View<Status> view) {
+    public StoryPresenter(View view) {
         super(view);
+    }
+
+    public interface View extends PagingPresenter.View<Status> {
+        // intentionally left blank
     }
 
     public void onStoryItemClick(String userAlias) {
